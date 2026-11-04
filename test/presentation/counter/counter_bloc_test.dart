@@ -249,6 +249,22 @@ void main() {
       expect: () => <CounterState>[],
     );
 
+    blocTest<CounterBloc, CounterState>(
+      'removes the goal when given null',
+      build: build,
+      seed: () => ready(const CounterEntity(count: 3, goal: 10)),
+      act: (bloc) => bloc.add(const CounterGoalChanged(null)),
+      expect: () => [ready(const CounterEntity(count: 3))],
+      verify: (_) => expect(repository.stored.goal, isNull),
+    );
+
+    test('without a goal the ring is empty and never reached', () {
+      final state = ready(const CounterEntity(count: 50));
+      expect(state.goal, isNull);
+      expect(state.progress, 0);
+      expect(state.goalReached, isFalse);
+    });
+
     test('progress fills towards the goal and stays full past it', () {
       expect(ready(const CounterEntity(count: 0, goal: 4)).progress, 0);
       expect(ready(const CounterEntity(count: 1, goal: 4)).progress, 0.25);

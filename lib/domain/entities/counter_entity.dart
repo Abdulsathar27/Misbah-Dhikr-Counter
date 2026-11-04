@@ -4,29 +4,38 @@ import '../../core/constants/app_constants.dart';
 
 /// The persisted counter: the current value, the values it can be undone
 /// back to (most recent last), the vibration preference and the goal the
-/// progress ring fills towards.
+/// progress ring fills towards. There is no goal until the user sets one.
 class CounterEntity extends Equatable {
   const CounterEntity({
     required this.count,
     this.undoHistory = const [],
     this.vibrationEnabled = true,
-    this.goal = AppConstants.defaultGoal,
+    this.goal,
   }) : assert(count >= 0, 'count must not be negative'),
-       assert(goal >= AppConstants.minGoal, 'goal must be positive');
+       assert(goal == null || goal >= AppConstants.minGoal, 'goal must be positive');
 
   static const CounterEntity initial = CounterEntity(count: 0);
 
   final int count;
   final List<int> undoHistory;
   final bool vibrationEnabled;
-  final int goal;
 
-  CounterEntity copyWith({int? count, List<int>? undoHistory, bool? vibrationEnabled, int? goal}) {
+  /// Null when the user has not set a goal.
+  final int? goal;
+
+  /// [goal] is a function so that it can also clear the goal: pass
+  /// `goal: () => null`.
+  CounterEntity copyWith({
+    int? count,
+    List<int>? undoHistory,
+    bool? vibrationEnabled,
+    int? Function()? goal,
+  }) {
     return CounterEntity(
       count: count ?? this.count,
       undoHistory: undoHistory ?? this.undoHistory,
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
-      goal: goal ?? this.goal,
+      goal: goal != null ? goal() : this.goal,
     );
   }
 

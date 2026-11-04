@@ -98,10 +98,10 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     }
   }
 
-  Future<void> _onGoalChanged(Emitter<CounterState> emit, int requested) async {
-    final goal = requested.clamp(AppConstants.minGoal, AppConstants.maxGoal);
+  Future<void> _onGoalChanged(Emitter<CounterState> emit, int? requested) async {
+    final goal = requested?.clamp(AppConstants.minGoal, AppConstants.maxGoal);
     if (goal == state.goal) return;
-    emit(state.copyWith(counter: state.counter.copyWith(goal: goal)));
+    emit(state.copyWith(counter: state.counter.copyWith(goal: () => goal)));
     try {
       await _repository.saveGoal(goal);
       if (state.failure != null) emit(state.copyWith(failure: () => null));

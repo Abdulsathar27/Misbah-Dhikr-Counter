@@ -44,6 +44,49 @@ void main() {
     expect(tapArea, findsOneWidget);
   });
 
+  testWidgets('starts with no goal: an empty ring that keeps counting', (tester) async {
+    await pumpApp(tester);
+
+    expect(ringShows('no goal set'), findsOneWidget);
+    expect(ringProgress(tester), 0);
+
+    for (var i = 0; i < 15; i++) {
+      await tester.tap(tapArea);
+    }
+    await tester.pumpAndSettle();
+    expect(ringShows('15'), findsOneWidget);
+    expect(ringShows('no goal set'), findsOneWidget);
+    expect(ringProgress(tester), 0);
+  });
+
+  testWidgets('a first goal can be set from an empty dialog', (tester) async {
+    await pumpApp(tester, saved: const CounterEntity(count: 2));
+
+    await tester.tap(find.bySemanticsLabel('Set goal. No goal set'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, isEmpty);
+    expect(find.text('Remove'), findsNothing);
+
+    await tester.enterText(find.byType(TextField), '33');
+    await tester.pump(); // Save enables once the field holds a valid goal
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(ringShows('31 to go'), findsOneWidget);
+    expect(repository.stored.goal, 33);
+  });
+
+  testWidgets('the goal can be removed again', (tester) async {
+    await pumpApp(tester, saved: const CounterEntity(count: 2, goal: 10));
+
+    await tester.tap(find.bySemanticsLabel('Set goal. Current goal: 10'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove'));
+    await tester.pumpAndSettle();
+
+    expect(ringShows('no goal set'), findsOneWidget);
+    expect(repository.stored.goal, isNull);
+  });
+
   testWidgets('tapping the button counts and fills the ring', (tester) async {
     await pumpApp(tester, saved: const CounterEntity(count: 0, goal: 4));
 
@@ -101,16 +144,8 @@ void main() {
     expect(repository.stored.count, 12);
   });
 
-  testWidgets('undo and reset controls update the counter', (tester) async {
+  testWidgets('the reset control sets the counter back to zero', (tester) async {
     await pumpApp(tester, saved: const CounterEntity(count: 7));
-
-    await tester.tap(tapArea);
-    await tester.pumpAndSettle();
-    expect(ringShows('8'), findsOneWidget);
-
-    await tester.tap(find.bySemanticsLabel('Undo last count'));
-    await tester.pumpAndSettle();
-    expect(ringShows('7'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Reset count'));
     await tester.pumpAndSettle();
@@ -149,7 +184,7 @@ void main() {
     await tester.pumpAndSettle(); // let the launch animation finish
 
     final screenBottom = tester.getBottomLeft(find.byType(Scaffold)).dy;
-    final controlBottom = tester.getBottomLeft(find.bySemanticsLabel('Undo last count')).dy;
+    final controlBottom = tester.getBottomLeft(find.bySemanticsLabel('Reset count')).dy;
     // 58px from the screen edge, as in the reference, not 34 + 58.
     expect(screenBottom - controlBottom, closeTo(58, 1));
   });
@@ -187,7 +222,7 @@ void main() {
 
   testWidgets('the controls and the ring are accessible', (tester) async {
     final semantics = tester.ensureSemantics();
-    await pumpApp(tester, saved: const CounterEntity(count: 3, undoHistory: [2]));
+    await pumpApp(tester, saved: const CounterEntity(count: 3, goal: 10));
 
     expect(
       tester.getSemantics(tapArea),
@@ -197,10 +232,7 @@ void main() {
       tester.getSemantics(ring),
       isSemantics(label: 'Current count: 3 of 10.', isButton: false, isLiveRegion: true),
     );
-    expect(
-      tester.getSemantics(find.bySemanticsLabel('Undo last count')),
-      isSemantics(isButton: true, isEnabled: true, hasTapAction: true),
-    );
+    expect(find.bySemanticsLabel('Undo last count'), findsNothing);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Reset count')),
       isSemantics(isButton: true, isEnabled: true, hasTapAction: true),

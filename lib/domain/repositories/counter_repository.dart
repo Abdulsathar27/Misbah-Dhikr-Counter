@@ -12,6 +12,6 @@ abstract interface class CounterRepository {
   /// Saves the vibration preference.
   Future<void> saveVibrationEnabled({required bool enabled});
 
-  /// Saves the goal the progress ring fills towards.
-  Future<void> saveGoal(int goal);
+  /// Saves the goal the progress ring fills towards; null removes it.
+  Future<void> saveGoal(int? goal);
 }

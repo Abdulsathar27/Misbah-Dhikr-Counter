@@ -7,8 +7,7 @@ abstract final class AppConstants {
   /// increments and resets. Older entries are discarded.
   static const int undoHistoryLimit = 100;
 
-  /// The goal the ring fills towards until the user sets their own.
-  static const int defaultGoal = 10;
+  /// The range a user-set goal must fall in. There is no default goal.
   static const int minGoal = 1;
   static const int maxGoal = 99999;
 }

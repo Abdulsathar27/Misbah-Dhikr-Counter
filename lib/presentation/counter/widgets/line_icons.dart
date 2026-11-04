@@ -2,10 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import '../../../app/theme/app_dimensions.dart';
 
-/// The reference's line icons (tabler arrow-back-up, tabler refresh, lucide
+/// The reference's line icons (tabler refresh, lucide
 /// vibrate / vibrate-off, tabler fingerprint, tabler target), drawn from their 24×24 SVG
 /// paths so the stroke style matches exactly without an SVG dependency.
-enum LineIconGlyph { undo, reset, vibrate, vibrateOff, fingerprint, target }
+enum LineIconGlyph { reset, vibrate, vibrateOff, fingerprint, target }
 
 class LineIcon extends StatelessWidget {
   const LineIcon(
@@ -57,24 +57,12 @@ class _LineIconPainter extends CustomPainter {
   }
 
   static Path _pathFor(LineIconGlyph glyph) => switch (glyph) {
-    LineIconGlyph.undo => _undo,
     LineIconGlyph.reset => _reset,
     LineIconGlyph.vibrate => _vibrate,
     LineIconGlyph.vibrateOff => _vibrateOff,
     LineIconGlyph.fingerprint => _fingerprint,
     LineIconGlyph.target => _target,
   };
-
-  // m9 14-4-4 4-4 · M5 10h11a4 4 0 1 1 0 8h-1
-  static final Path _undo =
-      Path()
-        ..moveTo(9, 14)
-        ..lineTo(5, 10)
-        ..lineTo(9, 6)
-        ..moveTo(5, 10)
-        ..lineTo(16, 10)
-        ..arcToPoint(const Offset(16, 18), radius: const Radius.circular(4), largeArc: true)
-        ..lineTo(15, 18);
 
   // M20 11A8.1 8.1 0 0 0 4.5 9 · M4 5v4h4 · m-4 4a8.1 8.1 0 0 0 15.5 2 · m.5 4v-4h-4
   static final Path _reset =

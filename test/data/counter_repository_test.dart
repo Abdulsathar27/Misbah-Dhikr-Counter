@@ -34,6 +34,14 @@ void main() {
     );
   });
 
+  test('removing the goal clears it from storage', () async {
+    final writer = await _repository();
+    await writer.saveGoal(33);
+    await writer.saveGoal(null);
+
+    expect((await _repository()).load().then((c) => c.goal), completion(isNull));
+  });
+
   test('sanitises corrupt stored values instead of going negative', () async {
     SharedPreferences.setMockInitialValues({
       StorageKeys.count: -5,
@@ -47,6 +55,6 @@ void main() {
     expect(loaded.count, 0);
     expect(loaded.undoHistory, [3, 4]);
     expect(loaded.vibrationEnabled, isTrue);
-    expect(loaded.goal, AppConstants.defaultGoal);
+    expect(loaded.goal, isNull);
   });
 }

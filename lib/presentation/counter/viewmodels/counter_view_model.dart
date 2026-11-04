@@ -20,20 +20,28 @@ class CounterViewModel extends Equatable {
   );
 
   final int count;
-  final int goal;
+
+  /// Null when the user has not set a goal.
+  final int? goal;
   final double progress;
   final bool goalReached;
 
   String get displayValue => '$count';
 
-  /// Under the count: how many are left, or that the goal is reached.
-  String get ringLabel => goalReached ? 'goal reached' : '${goal - count} to go';
+  /// Under the count: how many are left, that the goal is reached, or that
+  /// there is no goal yet.
+  String get ringLabel => switch (goal) {
+    null => 'no goal set',
+    _ when goalReached => 'goal reached',
+    final goal => '${goal - count} to go',
+  };
 
   /// Read out for the ring.
-  String get countLabel =>
-      goalReached
-          ? 'Current count: $count. Goal of $goal reached.'
-          : 'Current count: $count of $goal.';
+  String get countLabel => switch (goal) {
+    null => 'Current count: $count.',
+    _ when goalReached => 'Current count: $count. Goal of $goal reached.',
+    final goal => 'Current count: $count of $goal.',
+  };
 
   @override
   List<Object?> get props => [count, goal, progress, goalReached];

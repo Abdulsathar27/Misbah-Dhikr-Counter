@@ -41,31 +41,10 @@ class CounterControls extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             spacing: AppDimensions.controlGap,
-            children: [UndoControl(), ResetControl(), VibrationControl(), GoalControl()],
+            children: [ResetControl(), VibrationControl(), GoalControl()],
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Steps back to the previous count; disabled when there is nothing to undo.
-class UndoControl extends StatelessWidget {
-  const UndoControl({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocSelector<CounterBloc, CounterState, bool>(
-      selector: (state) => state.canUndo,
-      builder:
-          (context, canUndo) => CounterControlButton(
-            glyph: LineIconGlyph.undo,
-            semanticLabel: 'Undo last count',
-            onPressed:
-                canUndo
-                    ? () => context.read<CounterBloc>().add(const CounterUndoRequested())
-                    : null,
-          ),
     );
   }
 }
@@ -111,22 +90,24 @@ class VibrationControl extends StatelessWidget {
   }
 }
 
-/// Opens the goal dialog and applies the goal entered there.
+/// Opens the goal dialog and applies what was chosen there: a new goal, or
+/// removing the goal. Shows dimmed while no goal is set.
 class GoalControl extends StatelessWidget {
   const GoalControl({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<CounterBloc, CounterState, int>(
+    return BlocSelector<CounterBloc, CounterState, int?>(
       selector: (state) => state.goal,
       builder:
           (context, goal) => CounterControlButton(
             glyph: LineIconGlyph.target,
-            semanticLabel: 'Set goal. Current goal: $goal',
+            semanticLabel: goal == null ? 'Set goal. No goal set' : 'Set goal. Current goal: $goal',
+            iconColor: goal == null ? AppColors.secondary : AppColors.foreground,
             onPressed: () async {
               final bloc = context.read<CounterBloc>();
-              final newGoal = await showGoalDialog(context, current: goal);
-              if (newGoal != null) bloc.add(CounterGoalChanged(newGoal));
+              final choice = await showGoalDialog(context, current: goal);
+              if (choice != null) bloc.add(CounterGoalChanged(choice.goal));
             },
           ),
     );

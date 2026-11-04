@@ -30,12 +30,12 @@ final class CounterVibrationToggled extends CounterEvent {
   const CounterVibrationToggled();
 }
 
-/// Sets the goal the progress ring fills towards. Out-of-range values are
-/// clamped to the allowed range.
+/// Sets the goal the progress ring fills towards, or removes it when [goal]
+/// is null. Out-of-range values are clamped to the allowed range.
 final class CounterGoalChanged extends CounterEvent {
   const CounterGoalChanged(this.goal);
 
-  final int goal;
+  final int? goal;
 
   @override
   List<Object?> get props => [goal];

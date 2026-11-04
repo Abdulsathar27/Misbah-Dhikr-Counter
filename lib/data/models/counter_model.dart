@@ -29,9 +29,10 @@ class CounterModel extends CounterEntity {
       count: safeCount,
       undoHistory: List.unmodifiable(safeHistory),
       vibrationEnabled: vibrationEnabled ?? CounterEntity.initial.vibrationEnabled,
+      // A missing or out-of-range goal means none is set.
       goal:
           (goal == null || goal < AppConstants.minGoal || goal > AppConstants.maxGoal)
-              ? AppConstants.defaultGoal
+              ? null
               : goal,
     );
   }

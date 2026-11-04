@@ -8,7 +8,9 @@ abstract interface class CounterLocalDataSource {
   Future<CounterModel> read();
   Future<void> writeCount(CounterModel model);
   Future<void> writeVibrationEnabled({required bool enabled});
-  Future<void> writeGoal(int goal);
+
+  /// Saves [goal], or removes the saved goal when it is null.
+  Future<void> writeGoal(int? goal);
 }
 
 class SharedPreferencesCounterDataSource implements CounterLocalDataSource {
@@ -49,8 +51,11 @@ class SharedPreferencesCounterDataSource implements CounterLocalDataSource {
   }
 
   @override
-  Future<void> writeGoal(int goal) async {
-    final ok = await _preferences.setInt(StorageKeys.goal, goal);
+  Future<void> writeGoal(int? goal) async {
+    final ok =
+        goal == null
+            ? await _preferences.remove(StorageKeys.goal)
+            : await _preferences.setInt(StorageKeys.goal, goal);
     if (!ok) throw const StorageException('Failed to write goal');
   }
 }
