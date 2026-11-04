@@ -37,12 +37,4 @@ abstract final class AppTypography {
     height: 1.2,
     color: AppColors.secondary,
   );
-
-  static const TextStyle body = TextStyle(
-    fontFamily: bodyFamily,
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    height: 1.5,
-    color: AppColors.foreground,
-  );
 }

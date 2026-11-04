@@ -146,6 +146,7 @@ void main() {
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await pumpApp(tester);
+    await tester.pumpAndSettle(); // let the launch animation finish
 
     final screenBottom = tester.getBottomLeft(find.byType(Scaffold)).dy;
     final controlBottom = tester.getBottomLeft(find.bySemanticsLabel('Undo last count')).dy;

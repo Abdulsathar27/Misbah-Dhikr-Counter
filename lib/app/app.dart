@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/constants/app_constants.dart';
 import '../presentation/counter/bloc/counter_bloc.dart';
-import 'routes.dart';
+import '../presentation/counter/views/counter_page.dart';
 import 'theme/app_theme.dart';
 
 class MusmilesApp extends StatelessWidget {
@@ -21,8 +21,7 @@ class MusmilesApp extends StatelessWidget {
         title: AppConstants.appTitle,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
-        initialRoute: AppRoutes.counter,
-        routes: AppRoutes.routes,
+        home: const CounterPage(),
       ),
     );
   }

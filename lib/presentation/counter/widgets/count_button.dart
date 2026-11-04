@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimensions.dart';
+import 'disc_button.dart';
 import 'line_icons.dart';
 
-/// The round fingerprint button that counts. A [GestureDetector] drives a
-/// ripple that spreads from the touch point and fades out, and the disc presses
-/// down 1px like the bottom controls.
+/// The round fingerprint button that counts. Each press sends a ripple out
+/// from the touch point. It stays stateful only to own the ripple animation.
 class CountButton extends StatefulWidget {
   const CountButton({super.key, required this.semanticLabel, required this.onPressed});
 
@@ -22,35 +22,17 @@ class _CountButtonState extends State<CountButton> with SingleTickerProviderStat
     vsync: this,
     duration: AppMotion.ripple,
   );
-  late final Animation<double> _rippleProgress = CurvedAnimation(
+  late final Animation<double> _progress = CurvedAnimation(
     parent: _ripple,
     curve: AppMotion.rippleCurve,
   );
+  Offset _origin = Offset.zero;
 
-  static const Offset _center = Offset(
-    AppDimensions.countButtonSize / 2,
-    AppDimensions.countButtonSize / 2,
-  );
-
-  Offset _origin = _center;
-  bool _pressed = false;
-  bool _focused = false;
-
-  void _setPressed(bool value) {
-    if (_pressed != value) setState(() => _pressed = value);
-  }
-
-  /// Every tap restarts the ripple, so rapid taps each get their own. It is
-  /// skipped when the platform asks for reduced motion.
+  /// Every press restarts the ripple; skipped when reduced motion is on.
   void _startRipple(Offset origin) {
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return;
     _origin = origin;
     _ripple.forward(from: 0);
-  }
-
-  void _activate() {
-    _startRipple(_center);
-    widget.onPressed();
   }
 
   @override
@@ -61,71 +43,21 @@ class _CountButtonState extends State<CountButton> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: widget.semanticLabel,
-      excludeSemantics: true,
-      onTap: widget.onPressed,
-      child: FocusableActionDetector(
-        mouseCursor: SystemMouseCursors.click,
-        onShowFocusHighlight: (value) => setState(() => _focused = value),
-        actions: {ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => _activate())},
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (details) {
-            _setPressed(true);
-            _startRipple(details.localPosition);
-          },
-          onTapUp: (_) => _setPressed(false),
-          onTapCancel: () => _setPressed(false),
-          onTap: widget.onPressed,
-          child: _FocusRing(
-            visible: _focused,
-            child: AnimatedContainer(
-              duration: AppMotion.press,
-              curve: AppMotion.pressCurve,
-              width: AppDimensions.countButtonSize,
-              height: AppDimensions.countButtonSize,
-              transform: Matrix4.translationValues(0, _pressed ? 1 : 0, 0),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.divider),
-                boxShadow: [
-                  _pressed
-                      ? const BoxShadow(
-                        color: AppColors.controlShadowPressed,
-                        offset: Offset(0, 4),
-                        blurRadius: 10,
-                        spreadRadius: -6,
-                      )
-                      : const BoxShadow(
-                        color: AppColors.controlShadow,
-                        offset: Offset(0, 10),
-                        blurRadius: 22,
-                        spreadRadius: -10,
-                      ),
-                ],
-              ),
-              child: ClipOval(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Positioned.fill(
-                      child: RepaintBoundary(
-                        child: CustomPaint(
-                          painter: _RipplePainter(progress: _rippleProgress, origin: () => _origin),
-                        ),
-                      ),
-                    ),
-                    const LineIcon(
-                      LineIconGlyph.fingerprint,
-                      color: AppColors.foreground,
-                      size: AppDimensions.countButtonIconSize,
-                      strokeWidth: AppDimensions.countButtonIconStroke,
-                    ),
-                  ],
-                ),
+    return DiscButton(
+      size: AppDimensions.countButtonSize,
+      semanticLabel: widget.semanticLabel,
+      onPressed: widget.onPressed,
+      onPressStart: _startRipple,
+      child: ClipOval(
+        child: RepaintBoundary(
+          child: CustomPaint(
+            painter: _RipplePainter(_progress, () => _origin),
+            child: const Center(
+              child: LineIcon(
+                LineIconGlyph.fingerprint,
+                color: AppColors.foreground,
+                size: AppDimensions.countButtonIconSize,
+                strokeWidth: AppDimensions.countButtonIconStroke,
               ),
             ),
           ),
@@ -135,9 +67,9 @@ class _CountButtonState extends State<CountButton> with SingleTickerProviderStat
   }
 }
 
-/// A circle that grows from [origin] until it covers the disc, fading out.
+/// A circle that grows from the touch point until it covers the disc, fading out.
 class _RipplePainter extends CustomPainter {
-  _RipplePainter({required this.progress, required this.origin}) : super(repaint: progress);
+  _RipplePainter(this.progress, this.origin) : super(repaint: progress);
 
   final Animation<double> progress;
   final Offset Function() origin;
@@ -149,48 +81,14 @@ class _RipplePainter extends CustomPainter {
     final from = origin();
     // Far enough to reach the opposite edge from any touch point.
     final maxRadius = (size.center(Offset.zero) - from).distance + size.shortestSide / 2;
-    final paint = Paint()..color = AppColors.ripple.withValues(alpha: AppColors.ripple.a * (1 - t));
-    canvas.drawCircle(from, maxRadius * t, paint);
+    final alpha = AppColors.ripple.a * (1 - t);
+    canvas.drawCircle(
+      from,
+      maxRadius * t,
+      Paint()..color = AppColors.ripple.withValues(alpha: alpha),
+    );
   }
 
   @override
   bool shouldRepaint(_RipplePainter oldDelegate) => false;
-}
-
-/// `:focus-visible` outline: 2px solid secondary, offset from the disc.
-class _FocusRing extends StatelessWidget {
-  const _FocusRing({required this.visible, required this.child});
-
-  final bool visible;
-  final Widget child;
-
-  static const double _inset = -(AppDimensions.controlFocusOffset + AppDimensions.focusRingWidth);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        child,
-        if (visible)
-          const Positioned(
-            left: _inset,
-            top: _inset,
-            right: _inset,
-            bottom: _inset,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(
-                    BorderSide(color: AppColors.secondary, width: AppDimensions.focusRingWidth),
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 }

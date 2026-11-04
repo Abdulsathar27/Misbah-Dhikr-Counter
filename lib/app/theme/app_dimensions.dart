@@ -1,4 +1,4 @@
-import 'package:flutter/animation.dart';
+import 'package:flutter/widgets.dart';
 
 /// Layout, shape and motion tokens.
 abstract final class AppDimensions {
@@ -39,6 +39,17 @@ abstract final class AppDimensions {
 }
 
 abstract final class AppMotion {
+  /// [duration], or zero when the platform asks for reduced motion.
+  static Duration of(BuildContext context, Duration duration) =>
+      (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ? Duration.zero : duration;
+
+  /// Screen content sliding and fading in at launch.
+  static const Duration intro = Duration(milliseconds: 700);
+  static const Curve introCurve = Curves.easeOutCubic;
+
+  /// The count, its label and control icons swapping to a new value.
+  static const Duration swap = Duration(milliseconds: 250);
+
   /// The ring easing to its new fill after each count or goal change.
   static const Duration ring = Duration(milliseconds: 350);
   static const Curve ringCurve = Curves.easeOutCubic;

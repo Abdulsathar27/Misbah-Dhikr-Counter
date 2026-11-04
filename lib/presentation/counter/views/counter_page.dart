@@ -56,13 +56,39 @@ class _CounterPageState extends State<CounterPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: AppDimensions.screenTopPadding),
-              BrandHeader(),
-              Expanded(child: _Stage()),
-              _Controls(),
+              _Entrance(delay: 0, child: BrandHeader()),
+              Expanded(child: _Entrance(delay: 0.15, child: _Stage())),
+              _Entrance(delay: 0.3, child: _Controls()),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Fades [child] in while it rises into place at launch. [delay] is the share
+/// of the intro to wait first, so sections arrive one after another.
+class _Entrance extends StatelessWidget {
+  const _Entrance({required this.delay, required this.child});
+
+  final double delay;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: AppMotion.of(context, AppMotion.intro),
+      curve: Interval(delay, 1, curve: AppMotion.introCurve),
+      child: child,
+      builder:
+          (context, t, child) => Opacity(
+            opacity: t,
+            // Stays visible to assistive tech while it fades in.
+            alwaysIncludeSemantics: true,
+            child: Transform.translate(offset: Offset(0, 24 * (1 - t)), child: child),
+          ),
     );
   }
 }
@@ -94,6 +120,7 @@ class _Stage extends StatelessWidget {
                       value: vm.displayValue,
                       label: vm.ringLabel,
                       progress: vm.progress,
+                      reached: vm.goalReached,
                       semanticLabel: vm.countLabel,
                     ),
                     const SizedBox(height: AppDimensions.countButtonTopGap),
