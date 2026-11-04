@@ -1,6 +1,6 @@
 # Counter_app
 
-**MUSMILES — Goal Counter** is a Flutter tally counter with a dark design. The count sits inside a progress ring that fills towards a goal you set. Tap the fingerprint button to count up. Your count, goal, undo history and vibration setting are saved on the device, so they are still there when you reopen the app.
+**MISBAH — Goal Counter** is a Flutter tally counter with a dark design. The count sits inside a progress ring that fills towards a goal you set. Tap the fingerprint button to count up. Your count, goal, undo history and vibration setting are saved on the device, so they are still there when you reopen the app.
 
 ---
 
@@ -86,7 +86,7 @@ Data (models, local data source, repository implementation)
 lib/
 ├── main.dart                          # Entry point: orientation, system UI, DI, preloads the count
 ├── app/
-│   ├── app.dart                       # MusmilesApp (MaterialApp + BlocProvider)
+│   ├── app.dart                       # MisbahApp (MaterialApp + BlocProvider)
 │   ├── routes.dart                    # Route table
 │   └── theme/                         # Colors, dimensions, typography, theme
 ├── core/

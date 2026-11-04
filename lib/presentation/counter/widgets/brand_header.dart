@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/constants/app_constants.dart';
 
-/// The centred, widely tracked MUSMILES wordmark.
+/// The centred, widely tracked MISBAH wordmark.
 class BrandHeader extends StatelessWidget {
   const BrandHeader({super.key});
 

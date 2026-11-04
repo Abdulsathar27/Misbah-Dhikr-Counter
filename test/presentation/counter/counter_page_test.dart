@@ -21,7 +21,7 @@ void main() {
       ..add(const CounterInitialized());
     await tester.runAsync(() => bloc.stream.firstWhere((s) => s.isReady));
     addTearDown(bloc.close);
-    await tester.pumpWidget(MusmilesApp(counterBloc: bloc));
+    await tester.pumpWidget(MisbahApp(counterBloc: bloc));
     return bloc;
   }
 
@@ -40,7 +40,7 @@ void main() {
     expect(ringShows('4'), findsOneWidget);
     expect(ringShows('6 to go'), findsOneWidget);
     expect(ringProgress(tester), closeTo(0.4, 1e-9));
-    expect(find.text('MUSMILES'), findsOneWidget);
+    expect(find.text('MISBAH'), findsOneWidget);
     expect(tapArea, findsOneWidget);
   });
 

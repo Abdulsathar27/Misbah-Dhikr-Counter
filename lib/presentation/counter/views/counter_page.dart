@@ -8,7 +8,7 @@ import '../widgets/counter_stage.dart';
 import '../widgets/entrance_animation.dart';
 import '../widgets/failure_listener.dart';
 
-/// The single MUSMILES screen: brand, progress ring, count button, controls.
+/// The single MISBAH screen: brand, progress ring, count button, controls.
 /// Sections arrive one after another at launch.
 class CounterPage extends StatelessWidget {
   const CounterPage({super.key});

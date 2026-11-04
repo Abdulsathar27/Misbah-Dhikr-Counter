@@ -1,6 +1,6 @@
 abstract final class AppConstants {
-  static const String appTitle = 'Counter';
-  static const String brandName = 'Musmiles';
+  static const String appTitle = 'MISBAH';
+  static const String brandName = 'Misbah';
 
   /// How many previous values are kept so that undo can step back through
   /// increments and resets. Older entries are discarded.

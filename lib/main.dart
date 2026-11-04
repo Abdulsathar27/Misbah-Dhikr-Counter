@@ -25,5 +25,5 @@ Future<void> main() async {
   final counterBloc = sl<CounterBloc>()..add(const CounterInitialized());
   await counterBloc.stream.firstWhere((state) => state.isReady);
 
-  runApp(MusmilesApp(counterBloc: counterBloc));
+  runApp(MisbahApp(counterBloc: counterBloc));
 }
