@@ -18,6 +18,27 @@ abstract final class AppTypography {
     color: AppColors.foreground,
   );
 
+  /// The splash wordmark: the brand style, larger.
+  static const double splashTitleFontSize = 30;
+  static const TextStyle splashTitle = TextStyle(
+    fontFamily: bodyFamily,
+    fontSize: splashTitleFontSize,
+    fontWeight: FontWeight.w300,
+    letterSpacing: splashTitleFontSize * brandLetterSpacingEm,
+    height: 1.2,
+    color: AppColors.foreground,
+  );
+
+  /// The splash tagline under the wordmark.
+  static const TextStyle tagline = TextStyle(
+    fontFamily: bodyFamily,
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 0.4,
+    height: 1.5,
+    color: AppColors.secondary,
+  );
+
   /// The count in the middle of the ring.
   static const TextStyle count = TextStyle(
     fontFamily: bodyFamily,

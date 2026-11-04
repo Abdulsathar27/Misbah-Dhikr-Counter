@@ -21,7 +21,7 @@ void main() {
       ..add(const CounterInitialized());
     await tester.runAsync(() => bloc.stream.firstWhere((s) => s.isReady));
     addTearDown(bloc.close);
-    await tester.pumpWidget(MisbahApp(counterBloc: bloc));
+    await tester.pumpWidget(MisbahApp(counterBloc: bloc, showSplash: false));
     return bloc;
   }
 

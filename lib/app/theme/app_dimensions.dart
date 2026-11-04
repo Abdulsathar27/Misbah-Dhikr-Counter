@@ -33,6 +33,13 @@ abstract final class AppDimensions {
   static const double controlsBottomPadding = 58;
   static const double controlsMinBottomPadding = 24;
 
+  // Splash.
+  static const double splashMarkSize = 112;
+  static const double splashMarkStroke = 6;
+  static const double splashMarkIconSize = 48;
+  static const double splashTitleGap = 36;
+  static const double splashTaglineGap = 12;
+
   // Focus ring.
   static const double focusRingWidth = 2;
   static const double controlFocusOffset = 3;
@@ -42,6 +49,12 @@ abstract final class AppMotion {
   /// [duration], or zero when the platform asks for reduced motion.
   static Duration of(BuildContext context, Duration duration) =>
       (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ? Duration.zero : duration;
+
+  /// The whole splash: mark, wordmark and tagline arriving, then a short hold.
+  static const Duration splash = Duration(milliseconds: 2400);
+
+  /// The splash handing over to the counter screen.
+  static const Duration splashExit = Duration(milliseconds: 400);
 
   /// Screen content sliding and fading in at launch.
   static const Duration intro = Duration(milliseconds: 700);
