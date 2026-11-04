@@ -48,12 +48,14 @@ class CounterViewModel extends Equatable {
 class CounterControlsViewModel extends Equatable {
   const CounterControlsViewModel({
     required this.canUndo,
+    required this.canReset,
     required this.vibrationEnabled,
     required this.goal,
   });
 
   factory CounterControlsViewModel.fromState(CounterState state) => CounterControlsViewModel(
     canUndo: state.canUndo,
+    canReset: state.count > 0,
     vibrationEnabled: state.vibrationEnabled,
     goal: state.goal,
   );
@@ -62,6 +64,9 @@ class CounterControlsViewModel extends Equatable {
   static const String resetLabel = 'Reset count';
 
   final bool canUndo;
+
+  /// Reset does nothing at zero, so the button is disabled there.
+  final bool canReset;
   final bool vibrationEnabled;
   final int goal;
 
@@ -70,5 +75,5 @@ class CounterControlsViewModel extends Equatable {
   String get goalLabel => 'Set goal. Current goal: $goal';
 
   @override
-  List<Object?> get props => [canUndo, vibrationEnabled, goal];
+  List<Object?> get props => [canUndo, canReset, vibrationEnabled, goal];
 }

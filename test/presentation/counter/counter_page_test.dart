@@ -119,6 +119,40 @@ void main() {
     expect(repository.stored.count, 0);
   });
 
+  testWidgets('reset is disabled at zero', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await pumpApp(tester, saved: const CounterEntity(count: 0));
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Reset count')),
+      isSemantics(isButton: true, hasEnabledState: true, isEnabled: false),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('tells the user when the saved count could not be loaded', (tester) async {
+    repository.failLoad = true;
+    await pumpApp(tester);
+    await tester.pump();
+
+    expect(find.text('Your saved count could not be loaded.'), findsOneWidget);
+    expect(ringShows('0'), findsOneWidget);
+  });
+
+  testWidgets('does not double the bottom padding above the home indicator', (tester) async {
+    tester.view
+      ..padding = const FakeViewPadding(bottom: 34)
+      ..viewPadding = const FakeViewPadding(bottom: 34)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpApp(tester);
+
+    final screenBottom = tester.getBottomLeft(find.byType(Scaffold)).dy;
+    final controlBottom = tester.getBottomLeft(find.bySemanticsLabel('Undo last count')).dy;
+    // 58px from the screen edge, as in the reference, not 34 + 58.
+    expect(screenBottom - controlBottom, closeTo(58, 1));
+  });
+
   testWidgets('the goal button sets and saves a new goal', (tester) async {
     await pumpApp(tester, saved: const CounterEntity(count: 5, goal: 10));
 

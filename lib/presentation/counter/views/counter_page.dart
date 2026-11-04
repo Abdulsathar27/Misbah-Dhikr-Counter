@@ -15,22 +15,43 @@ import '../widgets/goal_ring.dart';
 import '../widgets/line_icons.dart';
 
 /// The single MUSMILES screen: brand, progress ring, count button, controls.
-class CounterPage extends StatelessWidget {
+class CounterPage extends StatefulWidget {
   const CounterPage({super.key});
+
+  @override
+  State<CounterPage> createState() => _CounterPageState();
+}
+
+class _CounterPageState extends State<CounterPage> {
+  @override
+  void initState() {
+    super.initState();
+    // The bloc is loaded before the first frame, so a load failure is already
+    // in the initial state, which BlocListener never reports. Show it here.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final failure = context.read<CounterBloc>().state.failure;
+      if (failure != null) _showFailure(failure.message);
+    });
+  }
+
+  void _showFailure(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CounterBloc, CounterState>(
       listenWhen:
           (previous, current) => current.failure != null && previous.failure != current.failure,
-      listener: (context, state) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(state.failure!.message)));
-      },
+      listener: (context, state) => _showFailure(state.failure!.message),
       child: const Scaffold(
         backgroundColor: AppColors.canvas,
         body: SafeArea(
+          // The controls handle the bottom inset themselves (see _Controls).
+          bottom: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -94,12 +115,13 @@ class _Controls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The reference's 58px bottom padding includes the home-indicator area;
-    // SafeArea already accounts for that, so only the remainder is added.
+    // The reference's 58px bottom padding includes the home-indicator area.
+    // The page's SafeArea skips the bottom edge so the inset is still visible
+    // here; keep at least the minimum gap above the home indicator.
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final bottomPadding = math.max(
-      AppDimensions.controlsBottomPadding - bottomInset,
-      AppDimensions.controlsMinBottomPadding,
+      AppDimensions.controlsBottomPadding,
+      bottomInset + AppDimensions.controlsMinBottomPadding,
     );
 
     return Semantics(
@@ -132,7 +154,7 @@ class _Controls extends StatelessWidget {
                   CounterControlButton(
                     glyph: LineIconGlyph.reset,
                     semanticLabel: CounterControlsViewModel.resetLabel,
-                    onPressed: () => bloc.add(const CounterResetRequested()),
+                    onPressed: vm.canReset ? () => bloc.add(const CounterResetRequested()) : null,
                   ),
                   const SizedBox(width: AppDimensions.controlGap),
                   CounterControlButton(
