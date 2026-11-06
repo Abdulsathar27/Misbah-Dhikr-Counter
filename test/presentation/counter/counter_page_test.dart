@@ -130,19 +130,21 @@ void main() {
     expect(find.byType(GoalReachedDialog), findsOneWidget);
   });
 
-  testWidgets('continuing without a goal keeps the count and counting works', (tester) async {
+  testWidgets('continuing without a goal starts again from zero', (tester) async {
     await reachGoal(tester);
 
     await tester.tap(find.text('Continue without goal'));
     await tester.pumpAndSettle();
     expect(find.byType(GoalReachedDialog), findsNothing);
-    expect(ringShows('12'), findsOneWidget);
+    expect(ringShows('0'), findsOneWidget);
     expect(ringShows('no goal set'), findsOneWidget);
+    expect(ringProgress(tester), 0);
+    expect(repository.stored.count, 0);
     expect(repository.stored.goal, isNull);
 
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
-    expect(ringShows('13'), findsOneWidget);
+    expect(ringShows('1'), findsOneWidget);
     expect(find.byType(GoalReachedDialog), findsNothing);
   });
 

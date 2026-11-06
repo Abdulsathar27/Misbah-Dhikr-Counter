@@ -46,19 +46,24 @@ class _GoalReachedListenerState extends State<GoalReachedListener> {
       final choice = await showGoalReachedDialog(context, goal: goal);
       if (!mounted) return;
       if (choice == GoalReachedChoice.continueWithoutGoal) {
-        bloc.add(const CounterGoalChanged(null));
+        _startAgain(bloc, goal: null);
         break;
       }
       final newGoal = (await showGoalDialog(context, current: null))?.goal;
       if (newGoal != null) {
-        // In this order, so the count is back at 0 before the new goal applies.
-        bloc
-          ..add(const CounterResetRequested())
-          ..add(CounterGoalChanged(newGoal));
+        _startAgain(bloc, goal: newGoal);
         break;
       }
     }
     _asking = false;
+  }
+
+  /// Every choice starts a new round from 0. The count resets first, so the
+  /// new goal never applies to the old count.
+  void _startAgain(CounterBloc bloc, {required int? goal}) {
+    bloc
+      ..add(const CounterResetRequested())
+      ..add(CounterGoalChanged(goal));
   }
 
   @override

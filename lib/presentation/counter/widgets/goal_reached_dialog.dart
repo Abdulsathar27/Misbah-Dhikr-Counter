@@ -25,8 +25,8 @@ class GoalReachedDialog extends StatelessWidget {
       child: AlertDialog(
         title: const Text('Goal reached'),
         content: Text(
-          'You reached your goal of $goal. Set a new goal to start again from 0, '
-          'or keep your count and continue without a goal.',
+          'You reached your goal of $goal. Set a new goal or continue without one. '
+          'Either way, the count starts again from 0.',
         ),
         actions: [
           TextButton(
