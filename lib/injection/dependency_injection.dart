@@ -13,7 +13,7 @@ Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl
     ..registerSingleton<SharedPreferences>(prefs)
-    ..registerLazySingleton<HapticsService>(() => const PlatformHapticsService())
+    ..registerLazySingleton<HapticsService>(() => const DeviceHapticsService())
     ..registerLazySingleton<CounterLocalDataSource>(() => SharedPreferencesCounterDataSource(sl()))
     ..registerLazySingleton<CounterRepository>(() => CounterRepositoryImpl(sl()))
     ..registerFactory<CounterBloc>(() => CounterBloc(repository: sl(), haptics: sl()));

@@ -67,6 +67,29 @@ void main() {
     );
 
     blocTest<CounterBloc, CounterState>(
+      'gives the goal pulse instead of a tick on the count that reaches the goal',
+      build: build,
+      seed: () => ready(const CounterEntity(count: 10, goal: 12)),
+      act:
+          (bloc) =>
+              bloc
+                ..add(const CounterIncremented())
+                ..add(const CounterIncremented()),
+      verify: (_) {
+        expect(haptics.ticks, 1);
+        expect(haptics.goalsReached, 1);
+      },
+    );
+
+    blocTest<CounterBloc, CounterState>(
+      'gives no goal pulse when vibration is off',
+      build: build,
+      seed: () => ready(const CounterEntity(count: 11, goal: 12, vibrationEnabled: false)),
+      act: (bloc) => bloc.add(const CounterIncremented()),
+      verify: (_) => expect(haptics.goalsReached, 0),
+    );
+
+    blocTest<CounterBloc, CounterState>(
       'stops at the goal without saving or vibrating',
       build: build,
       seed: () => ready(const CounterEntity(count: 12, goal: 12)),
@@ -243,6 +266,14 @@ void main() {
       act: (bloc) => bloc.add(const CounterGoalChanged(33)),
       expect: () => [ready(const CounterEntity(count: 3, goal: 33))],
       verify: (_) => expect(repository.stored.goal, 33),
+    );
+
+    blocTest<CounterBloc, CounterState>(
+      'gives the goal pulse when a goal at or below the count is set',
+      build: build,
+      seed: () => ready(const CounterEntity(count: 5)),
+      act: (bloc) => bloc.add(const CounterGoalChanged(5)),
+      verify: (_) => expect(haptics.goalsReached, 1),
     );
 
     blocTest<CounterBloc, CounterState>(

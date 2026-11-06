@@ -59,11 +59,9 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     // Counting stops at the goal until the user decides what comes next.
     if (state.goalReached) return;
     final current = state.counter;
-    _feedback(_haptics.tick);
-    await _commitCount(
-      emit,
-      current.copyWith(count: current.count + 1, undoHistory: _pushHistory(current)),
-    );
+    final next = current.count + 1;
+    _feedback(next == current.goal ? _haptics.goalReached : _haptics.tick);
+    await _commitCount(emit, current.copyWith(count: next, undoHistory: _pushHistory(current)));
   }
 
   Future<void> _onUndoRequested(Emitter<CounterState> emit) async {
@@ -104,6 +102,7 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     final goal = requested?.clamp(AppConstants.minGoal, AppConstants.maxGoal);
     if (goal == state.goal) return;
     emit(state.copyWith(counter: state.counter.copyWith(goal: () => goal)));
+    if (state.goalReached) _feedback(_haptics.goalReached);
     try {
       await _repository.saveGoal(goal);
       if (state.failure != null) emit(state.copyWith(failure: () => null));

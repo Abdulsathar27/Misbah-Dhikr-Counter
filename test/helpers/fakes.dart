@@ -41,10 +41,14 @@ class FakeCounterRepository implements CounterRepository {
 class FakeHapticsService implements HapticsService {
   int ticks = 0;
   int confirms = 0;
+  int goalsReached = 0;
 
   @override
   Future<void> tick() async => ticks++;
 
   @override
   Future<void> confirm() async => confirms++;
+
+  @override
+  Future<void> goalReached() async => goalsReached++;
 }

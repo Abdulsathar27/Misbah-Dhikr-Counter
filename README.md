@@ -11,7 +11,7 @@
 - **Goal reached:** counting stops at the goal and a dialog asks what comes next. Set a new goal or continue without one; either way the count starts again from 0.
 - **Fingerprint count button:** a round button with a fingerprint icon is the only way to count. It uses a `GestureDetector` with a ripple that spreads from where you touch, and presses down slightly. The ring only displays the count, and tapping anywhere else on the screen does nothing. Keyboard (Tab, then Enter) and screen readers also work through the button.
 - **Reset:** set the count back to 0. There is no undo button at the moment; the undo logic remains in the BLoC.
-- **Vibration toggle:** a light tick on each count and a firmer pulse on reset. You can turn it on or off, and the setting is saved.
+- **Vibration toggle:** the vibration motor gives a short buzz on each count, a firmer pulse on reset and a double pulse on reaching the goal. It uses the `vibration` package rather than the fainter system touch feedback. The in-app toggle turns it off, and the setting is saved.
 - **Persistence:** the count, goal, undo history and vibration setting are stored with `shared_preferences`. The saved count is loaded before the first frame, so the screen never shows a placeholder value.
 - **No lost taps:** events are processed one at a time in order, so rapid tapping never drops a count.
 - **Error handling:** if saving or loading fails, a SnackBar tells you. Corrupt stored values are cleaned up instead of crashing the app.
