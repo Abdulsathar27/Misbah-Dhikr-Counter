@@ -13,8 +13,6 @@ abstract final class AppConstants {
 }
 
 abstract final class StorageKeys {
-  static const String count = 'counter.count';
-  static const String undoHistory = 'counter.undo_history';
   static const String vibrationEnabled = 'counter.vibration_enabled';
   static const String goal = 'counter.goal';
 }

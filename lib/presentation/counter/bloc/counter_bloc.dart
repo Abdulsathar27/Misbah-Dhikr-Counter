@@ -49,7 +49,7 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
       emit(
         const CounterState(
           status: CounterStatus.ready,
-          failure: PersistenceFailure('Your saved count could not be loaded.'),
+          failure: PersistenceFailure('Your saved settings could not be loaded.'),
         ),
       );
     }
@@ -61,7 +61,7 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     final current = state.counter;
     final next = current.count + 1;
     _feedback(next == current.goal ? _haptics.goalReached : _haptics.tick);
-    await _commitCount(emit, current.copyWith(count: next, undoHistory: _pushHistory(current)));
+    _setCount(emit, current.copyWith(count: next, undoHistory: _pushHistory(current)));
   }
 
   Future<void> _onUndoRequested(Emitter<CounterState> emit) async {
@@ -69,7 +69,7 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     if (current.undoHistory.isEmpty) return;
     _feedback(_haptics.tick);
     final history = current.undoHistory;
-    await _commitCount(
+    _setCount(
       emit,
       current.copyWith(
         count: history.last,
@@ -83,7 +83,7 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     if (current.count == 0) return;
     _feedback(_haptics.confirm);
     // The value before the reset is kept, so an accidental reset can be undone.
-    await _commitCount(emit, current.copyWith(count: 0, undoHistory: _pushHistory(current)));
+    _setCount(emit, current.copyWith(count: 0, undoHistory: _pushHistory(current)));
   }
 
   Future<void> _onVibrationToggled(Emitter<CounterState> emit) async {
@@ -111,15 +111,8 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     }
   }
 
-  /// Shows the new value immediately, then persists it.
-  Future<void> _commitCount(Emitter<CounterState> emit, CounterEntity next) async {
+  void _setCount(Emitter<CounterState> emit, CounterEntity next) {
     emit(state.copyWith(counter: next));
-    try {
-      await _repository.saveCount(next);
-      if (state.failure != null) emit(state.copyWith(failure: () => null));
-    } on Object {
-      emit(state.copyWith(failure: () => const PersistenceFailure()));
-    }
   }
 
   List<int> _pushHistory(CounterEntity current) {

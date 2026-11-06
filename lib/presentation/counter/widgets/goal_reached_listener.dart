@@ -6,8 +6,7 @@ import '../bloc/counter_bloc.dart';
 import 'goal_dialog.dart';
 import 'goal_reached_dialog.dart';
 
-/// Asks what comes next whenever the goal is reached, including when the app
-/// opens on a goal that was already reached.
+/// Asks what comes next whenever the goal is reached.
 class GoalReachedListener extends StatefulWidget {
   const GoalReachedListener({super.key, required this.child});
 
@@ -19,14 +18,6 @@ class GoalReachedListener extends StatefulWidget {
 
 class _GoalReachedListenerState extends State<GoalReachedListener> {
   bool _asking = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && context.read<CounterBloc>().state.goalReached) _ask();
-    });
-  }
 
   /// Lets the ring finish filling, so the full ring is seen before the dialog.
   Future<void> _askAfterRingFills() async {

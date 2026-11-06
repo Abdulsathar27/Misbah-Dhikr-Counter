@@ -61,7 +61,6 @@ void main() {
             ready(const CounterEntity(count: 10, undoHistory: [9])),
           ],
       verify: (_) {
-        expect(repository.stored.count, 10);
         expect(haptics.ticks, 1);
       },
     );
@@ -96,7 +95,6 @@ void main() {
       act: (bloc) => bloc.add(const CounterIncremented()),
       expect: () => <CounterState>[],
       verify: (_) {
-        expect(repository.saveCountCalls, 0);
         expect(haptics.ticks, 0);
       },
     );
@@ -120,8 +118,6 @@ void main() {
       },
       verify: (bloc) {
         expect(bloc.state.count, 250);
-        expect(repository.stored.count, 250);
-        expect(repository.saveCountCalls, 250);
       },
     );
 
@@ -136,23 +132,6 @@ void main() {
       },
       verify: (bloc) => expect(bloc.state.counter.undoHistory, [2, 3, 4]),
     );
-
-    blocTest<CounterBloc, CounterState>(
-      'keeps the new value on screen and reports a failure when saving fails',
-      setUp: () => repository.failSave = true,
-      build: build,
-      seed: () => ready(const CounterEntity(count: 1)),
-      act: (bloc) => bloc.add(const CounterIncremented()),
-      expect:
-          () => [
-            ready(const CounterEntity(count: 2, undoHistory: [1])),
-            const CounterState(
-              status: CounterStatus.ready,
-              counter: CounterEntity(count: 2, undoHistory: [1]),
-              failure: PersistenceFailure(),
-            ),
-          ],
-    );
   });
 
   group('CounterUndoRequested', () {
@@ -165,7 +144,6 @@ void main() {
           () => [
             ready(const CounterEntity(count: 4, undoHistory: [3])),
           ],
-      verify: (_) => expect(repository.stored.count, 4),
     );
 
     blocTest<CounterBloc, CounterState>(
@@ -210,7 +188,6 @@ void main() {
             ready(const CounterEntity(count: 0, undoHistory: [36, 37])),
           ],
       verify: (_) {
-        expect(repository.stored.count, 0);
         expect(haptics.confirms, 1);
       },
     );
@@ -274,6 +251,23 @@ void main() {
       seed: () => ready(const CounterEntity(count: 5)),
       act: (bloc) => bloc.add(const CounterGoalChanged(5)),
       verify: (_) => expect(haptics.goalsReached, 1),
+    );
+
+    blocTest<CounterBloc, CounterState>(
+      'keeps the new goal on screen and reports a failure when saving fails',
+      setUp: () => repository.failSave = true,
+      build: build,
+      seed: () => ready(const CounterEntity(count: 1)),
+      act: (bloc) => bloc.add(const CounterGoalChanged(33)),
+      expect:
+          () => [
+            ready(const CounterEntity(count: 1, goal: 33)),
+            const CounterState(
+              status: CounterStatus.ready,
+              counter: CounterEntity(count: 1, goal: 33),
+              failure: PersistenceFailure(),
+            ),
+          ],
     );
 
     blocTest<CounterBloc, CounterState>(

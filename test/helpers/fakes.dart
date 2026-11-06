@@ -3,26 +3,19 @@ import 'package:counter/core/services/haptics_service.dart';
 import 'package:counter/domain/entities/counter_entity.dart';
 import 'package:counter/domain/repositories/counter_repository.dart';
 
-/// In-memory repository that records what was saved.
+/// In-memory repository that records what was saved. [stored] is what `load`
+/// returns, so tests can also start from any count.
 class FakeCounterRepository implements CounterRepository {
   FakeCounterRepository([this.stored = CounterEntity.initial]);
 
   CounterEntity stored;
   bool failLoad = false;
   bool failSave = false;
-  int saveCountCalls = 0;
 
   @override
   Future<CounterEntity> load() async {
     if (failLoad) throw const StorageException('load failed');
     return stored;
-  }
-
-  @override
-  Future<void> saveCount(CounterEntity counter) async {
-    saveCountCalls++;
-    if (failSave) throw const StorageException('save failed');
-    stored = stored.copyWith(count: counter.count, undoHistory: counter.undoHistory);
   }
 
   @override

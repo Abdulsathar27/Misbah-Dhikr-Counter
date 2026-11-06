@@ -101,7 +101,6 @@ void main() {
     expect(ringShows('1'), findsOneWidget);
     expect(ringShows('3 to go'), findsOneWidget);
     expect(ringProgress(tester), closeTo(0.25, 1e-9));
-    expect(repository.stored.count, 1);
   });
 
   /// Counts from 11 up to a goal of 12, which opens the goal-reached dialog.
@@ -143,7 +142,6 @@ void main() {
     expect(ringShows('0'), findsOneWidget);
     expect(ringShows('no goal set'), findsOneWidget);
     expect(ringProgress(tester), 1);
-    expect(repository.stored.count, 0);
     expect(repository.stored.goal, isNull);
 
     await tester.tap(tapArea);
@@ -166,7 +164,6 @@ void main() {
     expect(find.byType(GoalReachedDialog), findsNothing);
     expect(ringShows('0'), findsOneWidget);
     expect(ringShows('33 to go'), findsOneWidget);
-    expect(repository.stored.count, 0);
     expect(repository.stored.goal, 33);
   });
 
@@ -202,14 +199,6 @@ void main() {
     expect(find.byType(GoalReachedDialog), findsOneWidget);
   });
 
-  testWidgets('opening the app on a reached goal asks right away', (tester) async {
-    await pumpApp(tester, saved: const CounterEntity(count: 29, goal: 20));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
-    expect(find.textContaining('your goal of 20'), findsOneWidget);
-  });
-
   testWidgets('only the fingerprint button counts, not the ring or the screen', (tester) async {
     await pumpApp(tester, saved: const CounterEntity(count: 5));
 
@@ -218,12 +207,10 @@ void main() {
     await tester.tapAt(const Offset(20, 20));
     await tester.pumpAndSettle();
     expect(ringShows('5'), findsOneWidget);
-    expect(repository.stored.count, 5);
 
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
     expect(ringShows('6'), findsOneWidget);
-    expect(repository.stored.count, 6);
   });
 
   testWidgets('rapid taps are all counted', (tester) async {
@@ -236,7 +223,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(ringShows('12'), findsOneWidget);
-    expect(repository.stored.count, 12);
   });
 
   testWidgets('the reset control sets the counter back to zero', (tester) async {
@@ -246,7 +232,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(ringShows('0'), findsOneWidget);
     expect(ringProgress(tester), 0);
-    expect(repository.stored.count, 0);
   });
 
   testWidgets('reset is disabled at zero', (tester) async {
@@ -260,12 +245,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('tells the user when the saved count could not be loaded', (tester) async {
+  testWidgets('tells the user when the saved settings could not be loaded', (tester) async {
     repository.failLoad = true;
     await pumpApp(tester);
     await tester.pump();
 
-    expect(find.text('Your saved count could not be loaded.'), findsOneWidget);
+    expect(find.text('Your saved settings could not be loaded.'), findsOneWidget);
     expect(ringShows('0'), findsOneWidget);
   });
 

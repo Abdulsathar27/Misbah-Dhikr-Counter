@@ -1,6 +1,6 @@
 # Counter_app
 
-**MISBAH — Goal Counter** is a Flutter tally counter with a dark design. The count sits inside a progress ring that fills towards a goal you set. Tap the fingerprint button to count up. Your count, goal, undo history and vibration setting are saved on the device, so they are still there when you reopen the app.
+**MISBAH — Goal Counter** is a Flutter tally counter with a dark design. The count sits inside a progress ring that fills towards a goal you set. Tap the fingerprint button to count up. Your goal and vibration setting are saved on the device. The count starts at 0 each time the app is opened.
 
 ---
 
@@ -12,7 +12,7 @@
 - **Fingerprint count button:** a round button with a fingerprint icon is the only way to count. It uses a `GestureDetector` with a ripple that spreads from where you touch, and presses down slightly. The ring only displays the count, and tapping anywhere else on the screen does nothing. Keyboard (Tab, then Enter) and screen readers also work through the button.
 - **Reset:** set the count back to 0. There is no undo button at the moment; the undo logic remains in the BLoC.
 - **Vibration toggle:** the vibration motor gives a short buzz on each count, a firmer pulse on reset and a double pulse on reaching the goal. It uses the `vibration` package rather than the fainter system touch feedback. The in-app toggle turns it off, and the setting is saved.
-- **Persistence:** the count, goal, undo history and vibration setting are stored with `shared_preferences`. The saved count is loaded before the first frame, so the screen never shows a placeholder value.
+- **Persistence:** the goal and vibration setting are stored with `shared_preferences` and loaded before the first frame. The count is not saved, so it starts at 0 on every launch.
 - **No lost taps:** events are processed one at a time in order, so rapid tapping never drops a count.
 - **Error handling:** if saving or loading fails, a SnackBar tells you. Corrupt stored values are cleaned up instead of crashing the app.
 - **Accessibility:** semantic labels for the counter and every control, keyboard support, the ring and ripple animations are skipped when the system asks for reduced motion, and the layout scales down on small screens with large text.
@@ -62,7 +62,7 @@ Data (models, local data source, repository implementation)
 
 | Event | What it does |
 |---|---|
-| `CounterInitialized` | Loads the saved counter at startup |
+| `CounterInitialized` | Loads the saved settings at startup, with the count at 0 |
 | `CounterIncremented` | Adds 1 and records the previous value for undo; ignored once the goal is reached |
 | `CounterUndoRequested` | Restores the most recent previous value |
 | `CounterResetRequested` | Sets the count to 0 (can be undone) |
@@ -73,8 +73,6 @@ Data (models, local data source, repository implementation)
 
 | Key | Type | Contents |
 |---|---|---|
-| `counter.count` | `int` | Current count |
-| `counter.undo_history` | `List<String>` | Previous values, most recent last (max 100) |
 | `counter.vibration_enabled` | `bool` | Vibration preference |
 | `counter.goal` | `int` | Goal the ring fills towards (absent when no goal is set) |
 
@@ -155,9 +153,9 @@ flutter test
 
 The test suite covers:
 
-- **Repository:** loading defaults, restoring saved data (including the goal) in a new instance, and cleaning up corrupt values.
+- **Repository:** loading defaults, restoring saved settings in a new instance, starting at 0 after a restart, and cleaning up a corrupt goal.
 - **BLoC:** increment, undo, reset, the undo history limit, the vibration toggle, setting and clamping the goal, ring progress, haptic feedback, and persistence failures.
-- **Widgets:** the saved count and progress showing on the first frame, the ring filling and "goal reached", only the fingerprint button counting (taps on the ring or elsewhere are ignored), rapid taps, undo and reset controls, setting and cancelling a goal, accessibility labels, keyboard activation, small screens with large text, and reduced motion.
+- **Widgets:** the count and progress showing on the first frame, the ring filling and "goal reached", only the fingerprint button counting (taps on the ring or elsewhere are ignored), rapid taps, undo and reset controls, setting and cancelling a goal, accessibility labels, keyboard activation, small screens with large text, and reduced motion.
 
 Static analysis:
 

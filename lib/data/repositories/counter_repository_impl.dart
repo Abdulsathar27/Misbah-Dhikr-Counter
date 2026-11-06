@@ -1,7 +1,6 @@
 import '../../domain/entities/counter_entity.dart';
 import '../../domain/repositories/counter_repository.dart';
 import '../datasources/counter_local_datasource.dart';
-import '../models/counter_model.dart';
 
 class CounterRepositoryImpl implements CounterRepository {
   const CounterRepositoryImpl(this._localDataSource);
@@ -10,10 +9,6 @@ class CounterRepositoryImpl implements CounterRepository {
 
   @override
   Future<CounterEntity> load() async => (await _localDataSource.read()).toEntity();
-
-  @override
-  Future<void> saveCount(CounterEntity counter) =>
-      _localDataSource.writeCount(CounterModel.fromEntity(counter));
 
   @override
   Future<void> saveVibrationEnabled({required bool enabled}) =>

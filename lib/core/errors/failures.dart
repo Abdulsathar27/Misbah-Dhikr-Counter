@@ -11,5 +11,5 @@ sealed class Failure extends Equatable {
 }
 
 final class PersistenceFailure extends Failure {
-  const PersistenceFailure([super.message = 'Your count could not be saved.']);
+  const PersistenceFailure([super.message = 'Your settings could not be saved.']);
 }

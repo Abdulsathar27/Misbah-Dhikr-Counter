@@ -2,9 +2,10 @@ import 'package:equatable/equatable.dart';
 
 import '../../core/constants/app_constants.dart';
 
-/// The persisted counter: the current value, the values it can be undone
-/// back to (most recent last), the vibration preference and the goal the
-/// progress ring fills towards. There is no goal until the user sets one.
+/// The counter: the current value, the values it can be undone back to (most
+/// recent last), the vibration preference and the goal the progress ring fills
+/// towards. There is no goal until the user sets one. Only the preference and
+/// the goal are saved; the count starts at 0 on every launch.
 class CounterEntity extends Equatable {
   const CounterEntity({
     required this.count,
