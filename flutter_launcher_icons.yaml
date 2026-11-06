@@ -1,4 +1,7 @@
 # Regenerate the app icons with: flutter pub run flutter_launcher_icons
+# Afterwards run `flutter test`: the tool also overwrites an unrelated iOS build
+# setting, and test/ios_project_test.dart fails if it did. Set that setting back
+# to YES in ios/Runner.xcodeproj/project.pbxproj.
 flutter_launcher_icons:
   image_path: "assets/icon/app_icon.png"
 
