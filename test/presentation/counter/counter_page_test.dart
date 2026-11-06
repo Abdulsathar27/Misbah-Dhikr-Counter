@@ -2,6 +2,7 @@ import 'package:counter/app/app.dart';
 import 'package:counter/domain/entities/counter_entity.dart';
 import 'package:counter/presentation/counter/bloc/counter_bloc.dart';
 import 'package:counter/presentation/counter/widgets/count_button.dart';
+import 'package:counter/presentation/counter/widgets/goal_reached_dialog.dart';
 import 'package:counter/presentation/counter/widgets/goal_ring.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -99,20 +100,107 @@ void main() {
     expect(repository.stored.count, 1);
   });
 
-  testWidgets('shows "goal reached" at the goal and stays full past it', (tester) async {
+  /// Counts from 11 up to a goal of 12, which opens the goal-reached dialog.
+  Future<void> reachGoal(WidgetTester tester) async {
     await pumpApp(tester, saved: const CounterEntity(count: 11, goal: 12));
-
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
+  }
+
+  testWidgets('reaching the goal fills the ring and asks what comes next', (tester) async {
+    await reachGoal(tester);
+
     expect(ringShows('12'), findsOneWidget);
     expect(ringShows('goal reached'), findsOneWidget);
     expect(ringProgress(tester), 1);
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.text('Set new goal'), findsOneWidget);
+    expect(find.text('Continue without goal'), findsOneWidget);
+  });
+
+  testWidgets('the goal-reached dialog must be answered', (tester) async {
+    await reachGoal(tester);
+
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
+  });
+
+  testWidgets('continuing without a goal keeps the count and counting works', (tester) async {
+    await reachGoal(tester);
+
+    await tester.tap(find.text('Continue without goal'));
+    await tester.pumpAndSettle();
+    expect(find.byType(GoalReachedDialog), findsNothing);
+    expect(ringShows('12'), findsOneWidget);
+    expect(ringShows('no goal set'), findsOneWidget);
+    expect(repository.stored.goal, isNull);
 
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
     expect(ringShows('13'), findsOneWidget);
-    expect(ringShows('goal reached'), findsOneWidget);
-    expect(ringProgress(tester), 1);
+    expect(find.byType(GoalReachedDialog), findsNothing);
+  });
+
+  testWidgets('setting a new goal starts again from zero', (tester) async {
+    await reachGoal(tester);
+
+    await tester.tap(find.text('Set new goal'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '33');
+    await tester.pump(); // Save enables once the field holds a valid goal
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GoalReachedDialog), findsNothing);
+    expect(ringShows('0'), findsOneWidget);
+    expect(ringShows('33 to go'), findsOneWidget);
+    expect(repository.stored.count, 0);
+    expect(repository.stored.goal, 33);
+  });
+
+  testWidgets('cancelling the new goal asks again', (tester) async {
+    await reachGoal(tester);
+
+    await tester.tap(find.text('Set new goal'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(ringShows('12'), findsOneWidget);
+    expect(repository.stored.goal, 12);
+  });
+
+  testWidgets('the same goal can be set again and asks again next time', (tester) async {
+    await pumpApp(tester, saved: const CounterEntity(count: 0, goal: 1));
+    await tester.tap(tapArea);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Set new goal'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '1');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(ringShows('0'), findsOneWidget);
+    expect(find.byType(GoalReachedDialog), findsNothing);
+
+    await tester.tap(tapArea);
+    await tester.pumpAndSettle();
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
+  });
+
+  testWidgets('opening the app on a reached goal asks right away', (tester) async {
+    await pumpApp(tester, saved: const CounterEntity(count: 29, goal: 20));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.textContaining('your goal of 20'), findsOneWidget);
   });
 
   testWidgets('only the fingerprint button counts, not the ring or the screen', (tester) async {
@@ -203,6 +291,7 @@ void main() {
     expect(ringShows('goal reached'), findsOneWidget);
     expect(ringProgress(tester), 1);
     expect(repository.stored.goal, 5);
+    expect(find.byType(GoalReachedDialog), findsOneWidget);
   });
 
   testWidgets('the goal dialog rejects zero and can be cancelled', (tester) async {

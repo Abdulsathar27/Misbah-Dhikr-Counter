@@ -67,6 +67,18 @@ void main() {
     );
 
     blocTest<CounterBloc, CounterState>(
+      'stops at the goal without saving or vibrating',
+      build: build,
+      seed: () => ready(const CounterEntity(count: 12, goal: 12)),
+      act: (bloc) => bloc.add(const CounterIncremented()),
+      expect: () => <CounterState>[],
+      verify: (_) {
+        expect(repository.saveCountCalls, 0);
+        expect(haptics.ticks, 0);
+      },
+    );
+
+    blocTest<CounterBloc, CounterState>(
       'does not vibrate when vibration is off',
       build: build,
       seed: () => ready(const CounterEntity(count: 0, vibrationEnabled: false)),

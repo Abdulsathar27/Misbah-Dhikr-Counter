@@ -56,6 +56,8 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
   }
 
   Future<void> _onIncremented(Emitter<CounterState> emit) async {
+    // Counting stops at the goal until the user decides what comes next.
+    if (state.goalReached) return;
     final current = state.counter;
     _feedback(_haptics.tick);
     await _commitCount(

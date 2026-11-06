@@ -6,11 +6,11 @@
 
 ## Features
 
-- **Progress ring:** the count is shown in the middle of a blue ring that fills towards your goal. Under the count it says how many are left ("6 to go") or "goal reached". The ring stays full if you count past the goal, and long numbers shrink to fit inside it.
-- **Goal:** the target button opens a dialog where you enter a goal from 1 to 99,999. The default goal is 10, and the goal is saved.
+- **Progress ring:** the count is shown in the middle of a blue ring that fills towards your goal. Under the count it says how many are left ("6 to go"), "goal reached", or "no goal set". Long numbers shrink to fit inside the ring.
+- **Goal:** there is no goal until you set one. The target button opens a dialog where you enter a goal from 1 to 99,999 or remove the current goal, and the goal is saved.
+- **Goal reached:** counting stops at the goal and a dialog asks what comes next. Set a new goal to start again from 0, or continue without a goal and keep your count.
 - **Fingerprint count button:** a round button with a fingerprint icon is the only way to count. It uses a `GestureDetector` with a ripple that spreads from where you touch, and presses down slightly. The ring only displays the count, and tapping anywhere else on the screen does nothing. Keyboard (Tab, then Enter) and screen readers also work through the button.
-- **Undo:** step back through up to 100 previous values, including undoing an accidental reset.
-- **Reset:** set the count back to 0. You can undo a reset.
+- **Reset:** set the count back to 0. There is no undo button at the moment; the undo logic remains in the BLoC.
 - **Vibration toggle:** a light tick on each count and a firmer pulse on reset. You can turn it on or off, and the setting is saved.
 - **Persistence:** the count, goal, undo history and vibration setting are stored with `shared_preferences`. The saved count is loaded before the first frame, so the screen never shows a placeholder value.
 - **No lost taps:** events are processed one at a time in order, so rapid tapping never drops a count.
@@ -63,11 +63,11 @@ Data (models, local data source, repository implementation)
 | Event | What it does |
 |---|---|
 | `CounterInitialized` | Loads the saved counter at startup |
-| `CounterIncremented` | Adds 1 and records the previous value for undo |
+| `CounterIncremented` | Adds 1 and records the previous value for undo; ignored once the goal is reached |
 | `CounterUndoRequested` | Restores the most recent previous value |
 | `CounterResetRequested` | Sets the count to 0 (can be undone) |
 | `CounterVibrationToggled` | Turns haptic feedback on or off |
-| `CounterGoalChanged` | Sets the goal (clamped to 1–99,999) |
+| `CounterGoalChanged` | Sets the goal (clamped to 1–99,999), or removes it when null |
 
 ### Stored keys
 
@@ -76,7 +76,7 @@ Data (models, local data source, repository implementation)
 | `counter.count` | `int` | Current count |
 | `counter.undo_history` | `List<String>` | Previous values, most recent last (max 100) |
 | `counter.vibration_enabled` | `bool` | Vibration preference |
-| `counter.goal` | `int` | Goal the ring fills towards (default 10) |
+| `counter.goal` | `int` | Goal the ring fills towards (absent when no goal is set) |
 
 ---
 
