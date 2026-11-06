@@ -83,7 +83,7 @@ class VibrationControl extends StatelessWidget {
             glyph: enabled ? LineIconGlyph.vibrate : LineIconGlyph.vibrateOff,
             semanticLabel: 'Vibration: ${enabled ? 'on' : 'off'}',
             toggled: enabled,
-            iconColor: enabled ? AppColors.foreground : AppColors.secondary,
+            iconColor: enabled ? AppColors.accent : AppColors.secondary,
             onPressed: () => context.read<CounterBloc>().add(const CounterVibrationToggled()),
           ),
     );
@@ -103,7 +103,7 @@ class GoalControl extends StatelessWidget {
           (context, goal) => CounterControlButton(
             glyph: LineIconGlyph.target,
             semanticLabel: goal == null ? 'Set goal. No goal set' : 'Set goal. Current goal: $goal',
-            iconColor: goal == null ? AppColors.secondary : AppColors.foreground,
+            iconColor: goal == null ? AppColors.secondary : AppColors.accent,
             onPressed: () async {
               final bloc = context.read<CounterBloc>();
               final choice = await showGoalDialog(context, current: goal);

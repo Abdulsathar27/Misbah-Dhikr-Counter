@@ -55,7 +55,7 @@ class _CountButtonState extends State<CountButton> with SingleTickerProviderStat
             child: const Center(
               child: LineIcon(
                 LineIconGlyph.fingerprint,
-                color: AppColors.foreground,
+                color: AppColors.accent,
                 size: AppDimensions.countButtonIconSize,
                 strokeWidth: AppDimensions.countButtonIconStroke,
               ),

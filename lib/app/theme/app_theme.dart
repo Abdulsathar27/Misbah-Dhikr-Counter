@@ -29,7 +29,7 @@ abstract final class AppTheme {
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(foregroundColor: AppColors.foreground),
+      style: TextButton.styleFrom(foregroundColor: AppColors.accent),
     ),
     inputDecorationTheme: const InputDecorationTheme(
       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.divider)),

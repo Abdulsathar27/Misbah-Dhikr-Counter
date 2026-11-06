@@ -46,7 +46,7 @@ abstract final class AppTypography {
     fontWeight: FontWeight.w400,
     height: 1,
     leadingDistribution: TextLeadingDistribution.even,
-    color: AppColors.foreground,
+    color: AppColors.accent,
     fontFeatures: [FontFeature.tabularFigures()],
   );
 

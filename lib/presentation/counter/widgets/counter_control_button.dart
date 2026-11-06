@@ -14,7 +14,7 @@ class CounterControlButton extends StatelessWidget {
     required this.semanticLabel,
     required this.onPressed,
     this.toggled,
-    this.iconColor = AppColors.foreground,
+    this.iconColor = AppColors.accent,
   });
 
   final LineIconGlyph glyph;

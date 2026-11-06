@@ -153,7 +153,7 @@ class _Disc extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.fromBorderSide(
-                    BorderSide(color: AppColors.secondary, width: AppDimensions.focusRingWidth),
+                    BorderSide(color: AppColors.accent, width: AppDimensions.focusRingWidth),
                   ),
                 ),
               ),

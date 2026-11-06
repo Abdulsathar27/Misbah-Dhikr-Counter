@@ -40,7 +40,7 @@ class GoalRing extends StatelessWidget {
     final labelView = AnimatedDefaultTextStyle(
       duration: swap,
       style: AppTypography.ringLabel.copyWith(
-        color: reached ? AppColors.foreground : AppColors.secondary,
+        color: reached ? AppColors.accent : AppColors.secondary,
       ),
       child: AnimatedSwitcher(
         duration: swap,
