@@ -25,7 +25,7 @@ class GoalRing extends StatelessWidget {
 
   final String value;
 
-  /// Shown under the count, e.g. "3 to go" or "goal reached".
+  /// Shown under the count, e.g. "3 to go" or "goal reached". Empty for none.
   final String label;
 
   /// How full the ring is, from 0 to 1.
@@ -37,6 +37,23 @@ class GoalRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final swap = AppMotion.of(context, AppMotion.swap);
+    final labelView = AnimatedDefaultTextStyle(
+      duration: swap,
+      style: AppTypography.ringLabel.copyWith(
+        color: reached ? AppColors.foreground : AppColors.secondary,
+      ),
+      child: AnimatedSwitcher(
+        duration: swap,
+        child:
+            label.isEmpty
+                ? const SizedBox.shrink()
+                : Padding(
+                  key: ValueKey(label),
+                  padding: const EdgeInsets.only(top: AppDimensions.ringLabelGap),
+                  child: _FittedText(label, null),
+                ),
+      ),
+    );
     return Semantics(
       label: semanticLabel,
       liveRegion: true,
@@ -61,17 +78,12 @@ class GoalRing extends StatelessWidget {
                     transitionBuilder: _rollUp,
                     child: _FittedText(value, AppTypography.count, key: ValueKey(value)),
                   ),
-                  const SizedBox(height: AppDimensions.ringLabelGap),
-                  AnimatedDefaultTextStyle(
-                    duration: swap,
-                    style: AppTypography.ringLabel.copyWith(
-                      color: reached ? AppColors.foreground : AppColors.secondary,
-                    ),
-                    child: AnimatedSwitcher(
-                      duration: swap,
-                      child: _FittedText(label, null, key: ValueKey(label)),
-                    ),
-                  ),
+                  // Without a label the space closes, so the count sits centred.
+                  // AnimatedSize cannot run with the zero duration of reduced motion.
+                  if (swap == Duration.zero)
+                    labelView
+                  else
+                    AnimatedSize(duration: swap, child: labelView),
                 ],
               ),
             ),

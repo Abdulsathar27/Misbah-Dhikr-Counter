@@ -45,19 +45,21 @@ void main() {
     expect(tapArea, findsOneWidget);
   });
 
-  testWidgets('starts with no goal: an empty ring that keeps counting', (tester) async {
+  testWidgets('without a goal: a full ring, and the label goes once counting starts', (
+    tester,
+  ) async {
     await pumpApp(tester);
 
     expect(ringShows('no goal set'), findsOneWidget);
-    expect(ringProgress(tester), 0);
+    expect(ringProgress(tester), 1);
 
     for (var i = 0; i < 15; i++) {
       await tester.tap(tapArea);
     }
     await tester.pumpAndSettle();
     expect(ringShows('15'), findsOneWidget);
-    expect(ringShows('no goal set'), findsOneWidget);
-    expect(ringProgress(tester), 0);
+    expect(ringShows('no goal set'), findsNothing);
+    expect(ringProgress(tester), 1);
   });
 
   testWidgets('a first goal can be set from an empty dialog', (tester) async {
@@ -84,7 +86,9 @@ void main() {
     await tester.tap(find.text('Remove'));
     await tester.pumpAndSettle();
 
-    expect(ringShows('no goal set'), findsOneWidget);
+    expect(ringShows('2'), findsOneWidget);
+    expect(ringShows('8 to go'), findsNothing);
+    expect(ringProgress(tester), 1);
     expect(repository.stored.goal, isNull);
   });
 
@@ -138,13 +142,14 @@ void main() {
     expect(find.byType(GoalReachedDialog), findsNothing);
     expect(ringShows('0'), findsOneWidget);
     expect(ringShows('no goal set'), findsOneWidget);
-    expect(ringProgress(tester), 0);
+    expect(ringProgress(tester), 1);
     expect(repository.stored.count, 0);
     expect(repository.stored.goal, isNull);
 
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
     expect(ringShows('1'), findsOneWidget);
+    expect(ringShows('no goal set'), findsNothing);
     expect(find.byType(GoalReachedDialog), findsNothing);
   });
 
@@ -235,7 +240,7 @@ void main() {
   });
 
   testWidgets('the reset control sets the counter back to zero', (tester) async {
-    await pumpApp(tester, saved: const CounterEntity(count: 7));
+    await pumpApp(tester, saved: const CounterEntity(count: 7, goal: 10));
 
     await tester.tap(find.bySemanticsLabel('Reset count'));
     await tester.pumpAndSettle();
@@ -384,6 +389,8 @@ void main() {
     await tester.pump();
 
     expect(ringShows('1'), findsOneWidget);
+    expect(ringShows('no goal set'), findsNothing);
+    expect(tester.takeException(), isNull);
     expect(tester.hasRunningAnimations, isFalse);
   });
 }

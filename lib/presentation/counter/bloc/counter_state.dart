@@ -25,9 +25,9 @@ final class CounterState extends Equatable {
   bool get hasGoal => goal != null;
   bool get goalReached => hasGoal && count >= goal!;
 
-  /// How full the ring is, from 0 to 1. Empty without a goal; full at the
-  /// goal, or past it if a lower goal was set or older data was loaded.
-  double get progress => hasGoal ? (count / goal!).clamp(0.0, 1.0) : 0;
+  /// How full the ring is, from 0 to 1. Always full without a goal, as there
+  /// is nothing to fill towards; otherwise full from the goal onwards.
+  double get progress => hasGoal ? (count / goal!).clamp(0.0, 1.0) : 1;
 
   CounterState copyWith({
     CounterStatus? status,

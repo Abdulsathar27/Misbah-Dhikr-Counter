@@ -270,10 +270,10 @@ void main() {
       verify: (_) => expect(repository.stored.goal, isNull),
     );
 
-    test('without a goal the ring is empty and never reached', () {
+    test('without a goal the ring is full and never reached', () {
       final state = ready(const CounterEntity(count: 50));
       expect(state.goal, isNull);
-      expect(state.progress, 0);
+      expect(state.progress, 1);
       expect(state.goalReached, isFalse);
     });
 

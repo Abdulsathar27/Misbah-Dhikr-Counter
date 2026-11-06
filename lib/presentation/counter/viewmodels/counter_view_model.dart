@@ -29,9 +29,9 @@ class CounterViewModel extends Equatable {
   String get displayValue => '$count';
 
   /// Under the count: how many are left, that the goal is reached, or that
-  /// there is no goal yet.
+  /// there is no goal yet. Without a goal it disappears once counting starts.
   String get ringLabel => switch (goal) {
-    null => 'no goal set',
+    null => count == 0 ? 'no goal set' : '',
     _ when goalReached => 'goal reached',
     final goal => '${goal - count} to go',
   };
