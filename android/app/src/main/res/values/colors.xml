@@ -2,4 +2,5 @@
 <resources>
     <!-- Matches AppColors.canvas so launch blends into the Flutter splash. -->
     <color name="canvas">#171B20</color>
+	<color name="ic_launcher_background">#08392F</color>
 </resources>
