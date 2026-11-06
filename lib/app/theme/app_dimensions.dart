@@ -34,9 +34,11 @@ abstract final class AppDimensions {
   static const double controlsMinBottomPadding = 24;
 
   // Splash.
-  static const double splashMarkSize = 112;
-  static const double splashMarkStroke = 6;
-  static const double splashMarkIconSize = 48;
+  // The mark keeps the logo's proportions: its ring is 35/778 of the width and
+  // its disc 614/778.
+  static const double splashMarkSize = 148;
+  static const double splashMarkStroke = 6.7;
+  static const double splashMarkDiscSize = 117;
   static const double splashTitleGap = 36;
   static const double splashTaglineGap = 12;
 

@@ -2,8 +2,11 @@ import 'package:counter/app/app.dart';
 import 'package:counter/core/constants/app_constants.dart';
 import 'package:counter/presentation/counter/bloc/counter_bloc.dart';
 import 'package:counter/presentation/counter/views/counter_page.dart';
+import 'package:counter/presentation/counter/widgets/line_icons.dart';
 import 'package:counter/presentation/splash/views/splash_page.dart';
+import 'package:counter/presentation/splash/widgets/splash_mark.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fakes.dart';
@@ -29,6 +32,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SplashPage), findsNothing);
     expect(find.byType(CounterPage), findsOneWidget);
+  });
+
+  testWidgets('the emblem shows the Arabic word from the logo, not the fingerprint', (tester) async {
+    await pumpApp(tester);
+    await tester.pump();
+
+    expect(find.descendant(of: find.byType(SplashMark), matching: find.byType(LineIcon)), findsNothing);
+    final image = tester.widget<Image>(
+      find.descendant(of: find.byType(SplashMark), matching: find.byType(Image)),
+    );
+    expect(image.image, SplashMark.word);
+
+    // Fails if the asset is missing or is not declared in pubspec.yaml.
+    final data = await rootBundle.load(SplashMark.word.assetName);
+    expect(data.lengthInBytes, greaterThan(0));
+
+    await tester.pumpAndSettle();
   });
 
   testWidgets('a tap skips straight to the counter', (tester) async {

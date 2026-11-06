@@ -6,6 +6,8 @@
 
 ## Features
 
+- **Splash screen:** a gold ring draws itself around the Arabic word مصباح from the logo, then MISBAH and the tagline rise in.
+
 - **Progress ring:** the count is shown in the middle of a gold ring that fills towards your goal. Under the count it says how many are left ("6 to go"), "goal reached". With no goal the ring stays full, and "no goal set" shows only until counting starts. Long numbers shrink to fit inside the ring.
 - **Goal:** there is no goal until you set one. The target button opens a dialog where you enter a goal from 1 to 99,999 or remove the current goal, and the goal is saved.
 - **Goal reached:** counting stops at the goal and a dialog asks what comes next. Set a new goal or continue without one; either way the count starts again from 0.

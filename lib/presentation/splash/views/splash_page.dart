@@ -6,7 +6,7 @@ import '../../counter/views/counter_page.dart';
 import '../widgets/splash_mark.dart';
 import '../widgets/splash_text.dart';
 
-/// The launch screen: the ring draws itself around the fingerprint, MISBAH
+/// The launch screen: the ring draws itself around the Arabic word, MISBAH
 /// and the tagline rise in, then the counter fades in. Tap to skip.
 ///
 /// With reduced motion everything is shown at once and only the hold remains.
@@ -39,6 +39,8 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Decoded ahead of time so the word is ready when it fades in.
+    precacheImage(SplashMark.word, context);
     final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     Animation<double> phase(double begin, double end) =>
         still
