@@ -42,6 +42,14 @@ abstract final class AppDimensions {
   static const double splashTitleGap = 36;
   static const double splashTaglineGap = 12;
 
+  // Goal celebration.
+  static const double celebrationStageSize = 320;
+  static const double celebrationSparkSize = 44;
+  static const double celebrationEmblemScale = 1.25;
+  static const double celebrationPadding = 24;
+  static const double celebrationTextGap = 12;
+  static const double celebrationButtonHeight = 56;
+
   // Focus ring.
   static const double focusRingWidth = 2;
   static const double controlFocusOffset = 3;
@@ -57,6 +65,9 @@ abstract final class AppMotion {
 
   /// The splash handing over to the counter screen.
   static const Duration splashExit = Duration(milliseconds: 400);
+
+  /// The whole goal celebration, up to its buttons appearing.
+  static const Duration celebration = Duration(milliseconds: 2800);
 
   /// Screen content sliding and fading in at launch.
   static const Duration intro = Duration(milliseconds: 700);

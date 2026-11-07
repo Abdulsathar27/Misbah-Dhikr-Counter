@@ -8,6 +8,9 @@ abstract final class AppColors {
   static const Color lampGold = Color(0xFFE9B54A);
   static const Color cream = Color(0xFFFFF4DC);
 
+  /// Lamp gold darkened, for the raised edge under gold buttons.
+  static const Color lampGoldShade = Color(0xFFB0812A);
+
   // Role tokens.
   static const Color canvas = deepPine;
   static const Color surface = emerald;

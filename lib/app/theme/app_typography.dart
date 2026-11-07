@@ -39,6 +39,32 @@ abstract final class AppTypography {
     color: AppColors.secondary,
   );
 
+  /// The big number on the goal celebration.
+  static const TextStyle celebrationCount = TextStyle(
+    fontFamily: bodyFamily,
+    fontSize: 84,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+    color: AppColors.accent,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
+  /// "Goal complete!" under the number.
+  static const TextStyle celebrationTitle = TextStyle(
+    fontFamily: bodyFamily,
+    fontSize: 28,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    color: AppColors.foreground,
+  );
+
+  /// The goal celebration's buttons.
+  static const TextStyle celebrationButton = TextStyle(
+    fontFamily: bodyFamily,
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+  );
+
   /// The count in the middle of the ring.
   static const TextStyle count = TextStyle(
     fontFamily: bodyFamily,

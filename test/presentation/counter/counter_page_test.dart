@@ -1,8 +1,8 @@
 import 'package:counter/app/app.dart';
 import 'package:counter/domain/entities/counter_entity.dart';
 import 'package:counter/presentation/counter/bloc/counter_bloc.dart';
+import 'package:counter/presentation/counter/views/goal_celebration_page.dart';
 import 'package:counter/presentation/counter/widgets/count_button.dart';
-import 'package:counter/presentation/counter/widgets/goal_reached_dialog.dart';
 import 'package:counter/presentation/counter/widgets/goal_ring.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,9 +26,9 @@ void main() {
     return bloc;
   }
 
-  final ring = find.byType(GoalRing);
+  final ring = find.byType(GoalRing, skipOffstage: false);
 
-  Finder ringShows(String text) => find.descendant(of: ring, matching: find.text(text));
+  Finder ringShows(String text) => find.descendant(of: ring, matching: find.text(text, skipOffstage: false));
 
   double ringProgress(WidgetTester tester) => tester.widget<GoalRing>(ring).progress;
 
@@ -103,34 +103,117 @@ void main() {
     expect(ringProgress(tester), closeTo(0.25, 1e-9));
   });
 
-  /// Counts from 11 up to a goal of 12, which opens the goal-reached dialog.
+  /// Counts from 11 up to a goal of 12, which opens the celebration.
   Future<void> reachGoal(WidgetTester tester) async {
     await pumpApp(tester, saved: const CounterEntity(count: 11, goal: 12));
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
   }
 
-  testWidgets('reaching the goal fills the ring and asks what comes next', (tester) async {
+  testWidgets('reaching the goal fills the ring and celebrates', (tester) async {
     await reachGoal(tester);
 
     expect(ringShows('12'), findsOneWidget);
     expect(ringShows('goal reached'), findsOneWidget);
     expect(ringProgress(tester), 1);
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
     expect(find.text('Set new goal'), findsOneWidget);
     expect(find.text('Continue without goal'), findsOneWidget);
+    expect(find.text('Goal complete!'), findsOneWidget);
+    expect(
+      find.descendant(of: find.byType(GoalCelebrationPage), matching: find.text('12')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('the goal-reached dialog must be answered', (tester) async {
+  testWidgets('the number counts up and the buttons arrive last', (tester) async {
+    await pumpApp(tester, saved: const CounterEntity(count: 99, goal: 100));
+    await tester.tap(tapArea);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump(const Duration(milliseconds: 1500));
+
+    final page = find.byType(GoalCelebrationPage);
+    final number = tester.widget<Text>(
+      find.descendant(of: page, matching: find.textContaining(RegExp(r'^\d+$'))),
+    );
+    expect(int.parse(number.data!), inExclusiveRange(0, 100));
+
+    FadeTransition buttons() => tester.widget<FadeTransition>(
+      find
+          .ancestor(of: find.text('Set new goal'), matching: find.byType(FadeTransition))
+          .first,
+    );
+    expect(buttons().opacity.value, lessThan(1));
+
+    await tester.pumpAndSettle();
+    expect(buttons().opacity.value, 1);
+  });
+
+  testWidgets('the buttons cannot be tapped until they have appeared', (tester) async {
+    await pumpApp(tester, saved: const CounterEntity(count: 11, goal: 12));
+    await tester.tap(tapArea);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Continue without goal'), warnIfMissed: false);
+    await tester.pump();
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
+    expect(repository.stored.goal, 12);
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue without goal'));
+    await tester.pumpAndSettle();
+    expect(find.byType(GoalCelebrationPage), findsNothing);
+    expect(repository.stored.goal, isNull);
+  });
+
+  testWidgets('with reduced motion the celebration shows everything at once', (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+      disableAnimations: true,
+    );
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    await pumpApp(tester, saved: const CounterEntity(count: 11, goal: 12));
+
+    await tester.tap(tapArea);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(tester.takeException(), isNull);
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(find.text('Goal complete!'), findsOneWidget);
+    expect(
+      find.descendant(of: find.byType(GoalCelebrationPage), matching: find.text('12')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the celebration fits a small screen with large text', (tester) async {
+    tester.view
+      ..physicalSize = const Size(320, 480)
+      ..devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await reachGoal(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Set new goal').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('the celebration must be answered', (tester) async {
     await reachGoal(tester);
 
     await tester.tapAt(const Offset(5, 5));
     await tester.pumpAndSettle();
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
   });
 
   testWidgets('continuing without a goal starts again from zero', (tester) async {
@@ -138,7 +221,7 @@ void main() {
 
     await tester.tap(find.text('Continue without goal'));
     await tester.pumpAndSettle();
-    expect(find.byType(GoalReachedDialog), findsNothing);
+    expect(find.byType(GoalCelebrationPage), findsNothing);
     expect(ringShows('0'), findsOneWidget);
     expect(ringShows('no goal set'), findsOneWidget);
     expect(ringProgress(tester), 1);
@@ -148,7 +231,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(ringShows('1'), findsOneWidget);
     expect(ringShows('no goal set'), findsNothing);
-    expect(find.byType(GoalReachedDialog), findsNothing);
+    expect(find.byType(GoalCelebrationPage), findsNothing);
   });
 
   testWidgets('setting a new goal starts again from zero', (tester) async {
@@ -161,13 +244,13 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(GoalReachedDialog), findsNothing);
+    expect(find.byType(GoalCelebrationPage), findsNothing);
     expect(ringShows('0'), findsOneWidget);
     expect(ringShows('33 to go'), findsOneWidget);
     expect(repository.stored.goal, 33);
   });
 
-  testWidgets('cancelling the new goal asks again', (tester) async {
+  testWidgets('cancelling the new goal stays on the celebration', (tester) async {
     await reachGoal(tester);
 
     await tester.tap(find.text('Set new goal'));
@@ -175,7 +258,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
     expect(ringShows('12'), findsOneWidget);
     expect(repository.stored.goal, 12);
   });
@@ -192,11 +275,11 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(ringShows('0'), findsOneWidget);
-    expect(find.byType(GoalReachedDialog), findsNothing);
+    expect(find.byType(GoalCelebrationPage), findsNothing);
 
     await tester.tap(tapArea);
     await tester.pumpAndSettle();
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
   });
 
   testWidgets('only the fingerprint button counts, not the ring or the screen', (tester) async {
@@ -283,7 +366,7 @@ void main() {
     expect(ringShows('goal reached'), findsOneWidget);
     expect(ringProgress(tester), 1);
     expect(repository.stored.goal, 5);
-    expect(find.byType(GoalReachedDialog), findsOneWidget);
+    expect(find.byType(GoalCelebrationPage), findsOneWidget);
   });
 
   testWidgets('the goal dialog rejects zero and can be cancelled', (tester) async {

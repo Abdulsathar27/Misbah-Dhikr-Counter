@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../app/theme/app_dimensions.dart';
 import '../bloc/counter_bloc.dart';
-import 'goal_dialog.dart';
-import 'goal_reached_dialog.dart';
+import '../views/goal_celebration_page.dart';
 
-/// Asks what comes next whenever the goal is reached.
+/// Celebrates and asks what comes next whenever the goal is reached.
 class GoalReachedListener extends StatefulWidget {
   const GoalReachedListener({super.key, required this.child});
 
@@ -19,7 +18,7 @@ class GoalReachedListener extends StatefulWidget {
 class _GoalReachedListenerState extends State<GoalReachedListener> {
   bool _asking = false;
 
-  /// Lets the ring finish filling, so the full ring is seen before the dialog.
+  /// Lets the ring finish filling, so the full ring is seen before the celebration.
   Future<void> _askAfterRingFills() async {
     await Future<void>.delayed(AppMotion.of(context, AppMotion.ring));
     if (mounted) await _ask();
@@ -30,31 +29,14 @@ class _GoalReachedListenerState extends State<GoalReachedListener> {
     final goal = bloc.state.goal;
     if (_asking || !bloc.state.goalReached || goal == null) return;
     _asking = true;
-
-    // Cancelling the new-goal dialog comes back here: a choice is still needed.
-    while (true) {
-      if (!mounted) return;
-      final choice = await showGoalReachedDialog(context, goal: goal);
-      if (!mounted) return;
-      if (choice == GoalReachedChoice.continueWithoutGoal) {
-        _startAgain(bloc, goal: null);
-        break;
-      }
-      final newGoal = (await showGoalDialog(context, current: null))?.goal;
-      if (newGoal != null) {
-        _startAgain(bloc, goal: newGoal);
-        break;
-      }
-    }
+    final choice = await showGoalCelebration(context, goal: goal);
     _asking = false;
-  }
-
-  /// Every choice starts a new round from 0. The count resets first, so the
-  /// new goal never applies to the old count.
-  void _startAgain(CounterBloc bloc, {required int? goal}) {
+    if (choice == null) return;
+    // Every choice starts a new round from 0. The count resets first, so the
+    // new goal never applies to the old count.
     bloc
       ..add(const CounterResetRequested())
-      ..add(CounterGoalChanged(goal));
+      ..add(CounterGoalChanged(choice.goal));
   }
 
   @override
