@@ -1,4 +1,4 @@
-package com.example.counter
+package com.misbah.dhikrcounter
 
 import io.flutter.embedding.android.FlutterActivity
 
