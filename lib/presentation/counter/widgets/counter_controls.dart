@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimensions.dart';
+import '../../../app/theme/app_layout.dart';
+import '../../shared/widgets/grow_with_screen.dart';
 import '../bloc/counter_bloc.dart';
 import 'counter_control_button.dart';
 import 'goal_dialog.dart';
@@ -18,10 +20,12 @@ class CounterControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The reference's 58px bottom padding includes the home-indicator area;
-    // keep at least the minimum gap above the indicator.
+    // keep at least the minimum gap above the indicator. Both tighten on
+    // short screens.
+    final spacing = AppLayout.spacingOf(context);
     final bottomPadding = math.max(
-      AppDimensions.controlsBottomPadding,
-      MediaQuery.viewPaddingOf(context).bottom + AppDimensions.controlsMinBottomPadding,
+      AppDimensions.controlsBottomPadding * spacing,
+      MediaQuery.viewPaddingOf(context).bottom + AppDimensions.controlsMinBottomPadding * spacing,
     );
 
     return Semantics(
@@ -31,17 +35,20 @@ class CounterControls extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           AppDimensions.controlsHorizontalPadding,
-          AppDimensions.controlsTopPadding,
+          AppDimensions.controlsTopPadding * spacing,
           AppDimensions.controlsHorizontalPadding,
           bottomPadding,
         ),
-        // Scales down on narrow screens instead of overflowing.
+        // Grows on large screens; scales down on narrow ones instead of
+        // overflowing.
         child: const FittedBox(
           fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: AppDimensions.controlGap,
-            children: [ResetControl(), VibrationControl(), GoalControl()],
+          child: GrowWithScreen(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppDimensions.controlGap,
+              children: [ResetControl(), VibrationControl(), GoalControl()],
+            ),
           ),
         ),
       ),

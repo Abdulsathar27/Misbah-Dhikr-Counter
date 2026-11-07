@@ -17,11 +17,6 @@ final class CounterIncremented extends CounterEvent {
   const CounterIncremented();
 }
 
-/// Steps back to the value before the most recent increment or reset.
-final class CounterUndoRequested extends CounterEvent {
-  const CounterUndoRequested();
-}
-
 final class CounterResetRequested extends CounterEvent {
   const CounterResetRequested();
 }

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimensions.dart';
-import '../../../app/theme/app_typography.dart';
-import '../../splash/widgets/splash_mark.dart';
-import '../widgets/celebration_burst.dart';
+import '../../shared/widgets/grow_with_screen.dart';
+import '../widgets/celebration_actions.dart';
+import '../widgets/celebration_count_up.dart';
+import '../widgets/celebration_emblem.dart';
+import '../widgets/celebration_message.dart';
 import '../widgets/goal_dialog.dart';
+import '../widgets/rise_in.dart';
 
 /// Celebrates reaching [goal] full-screen, then asks what comes next. It must
 /// be answered: back does nothing, as counting stays stopped until then.
@@ -101,223 +104,62 @@ class _GoalCelebrationPageState extends State<GoalCelebrationPage>
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(AppDimensions.celebrationPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    // Scales down on very small screens instead of overflowing.
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _CelebrationEmblem(
-                            spark: _spark,
-                            sparkFade: _sparkFade,
-                            rays: _rays,
-                            glow: _glow,
-                            emblem: _emblem,
-                            emblemScale: _emblemScale,
+              // Keeps the buttons a comfortable width on tablets.
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: AppDimensions.celebrationMaxWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        // Scales down on very small screens instead of overflowing.
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: GrowWithScreen(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CelebrationEmblem(
+                                  spark: _spark,
+                                  sparkFade: _sparkFade,
+                                  rays: _rays,
+                                  glow: _glow,
+                                  emblem: _emblem,
+                                  emblemScale: _emblemScale,
+                                ),
+                                CelebrationCountUp(goal: widget.goal, animation: _count),
+                                const SizedBox(height: AppDimensions.celebrationTextGap),
+                                RiseIn(
+                                  animation: _title,
+                                  child: CelebrationMessage(goal: widget.goal),
+                                ),
+                              ],
+                            ),
                           ),
-                          _CountUp(goal: widget.goal, animation: _count),
-                          const SizedBox(height: AppDimensions.celebrationTextGap),
-                          _RiseIn(
-                            animation: _title,
-                            child: _CelebrationMessage(goal: widget.goal),
+                        ),
+                      ),
+                      // Not tappable until visible, so a stray tap cannot choose
+                      // an option nobody can see yet.
+                      AnimatedBuilder(
+                        animation: _buttons,
+                        builder:
+                            (context, child) =>
+                                IgnorePointer(ignoring: _buttons.value < 1, child: child),
+                        child: RiseIn(
+                          animation: _buttons,
+                          child: CelebrationActions(
+                            onSetNewGoal: _setNewGoal,
+                            onContinue: _continueWithoutGoal,
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  // Not tappable until visible, so a stray tap cannot choose
-                  // an option nobody can see yet.
-                  AnimatedBuilder(
-                    animation: _buttons,
-                    builder:
-                        (context, child) =>
-                            IgnorePointer(ignoring: _buttons.value < 1, child: child),
-                    child: _RiseIn(
-                      animation: _buttons,
-                      child: _CelebrationActions(
-                        onSetNewGoal: _setNewGoal,
-                        onContinue: _continueWithoutGoal,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// The burst with the spark at its centre, and the emblem that grows from it.
-class _CelebrationEmblem extends StatelessWidget {
-  const _CelebrationEmblem({
-    required this.spark,
-    required this.sparkFade,
-    required this.rays,
-    required this.glow,
-    required this.emblem,
-    required this.emblemScale,
-  });
-
-  final Animation<double> spark;
-  final Animation<double> sparkFade;
-  final Animation<double> rays;
-  final Animation<double> glow;
-  final Animation<double> emblem;
-  final Animation<double> emblemScale;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: AppDimensions.celebrationStageSize,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(child: CelebrationBurst(rays: rays, glow: glow)),
-          ScaleTransition(
-            scale: Tween(begin: 0.3, end: AppDimensions.celebrationEmblemScale).animate(emblemScale),
-            child: FadeTransition(opacity: emblem, child: SplashMark(progress: emblem)),
-          ),
-          FadeTransition(
-            opacity: sparkFade,
-            child: ScaleTransition(scale: spark, child: const _Spark()),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The small glowing gold orb the burst starts from.
-class _Spark extends StatelessWidget {
-  const _Spark();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.square(
-      dimension: AppDimensions.celebrationSparkSize,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: Alignment(-0.3, -0.35),
-            colors: [AppColors.cream, AppColors.lampGold],
-          ),
-          boxShadow: [BoxShadow(color: AppColors.lampGold, blurRadius: 28, spreadRadius: 4)],
-        ),
-      ),
-    );
-  }
-}
-
-/// The number rolling up from 0 to the goal.
-class _CountUp extends StatelessWidget {
-  const _CountUp({required this.goal, required this.animation});
-
-  final int goal;
-  final Animation<double> animation;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder:
-          (context, _) => Text(
-            '${(goal * animation.value).round()}',
-            maxLines: 1,
-            style: AppTypography.celebrationCount,
-            textScaler: TextScaler.noScaling,
-          ),
-    );
-  }
-}
-
-class _CelebrationMessage extends StatelessWidget {
-  const _CelebrationMessage({required this.goal});
-
-  final int goal;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Semantics(
-          header: true,
-          liveRegion: true,
-          child: const Text('Goal complete!', style: AppTypography.celebrationTitle),
-        ),
-        const SizedBox(height: AppDimensions.splashTaglineGap),
-        Text('You reached your goal of $goal', style: AppTypography.tagline),
-      ],
-    );
-  }
-}
-
-class _CelebrationActions extends StatelessWidget {
-  const _CelebrationActions({required this.onSetNewGoal, required this.onContinue});
-
-  final VoidCallback onSetNewGoal;
-  final VoidCallback onContinue;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // A darker lip under the pill gives the button a raised, tactile edge.
-        DecoratedBox(
-          decoration: const ShapeDecoration(
-            shape: StadiumBorder(),
-            shadows: [BoxShadow(color: AppColors.lampGoldShade, offset: Offset(0, 4))],
-          ),
-          child: FilledButton(
-            onPressed: onSetNewGoal,
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.accent,
-              foregroundColor: AppColors.onAccent,
-              minimumSize: const Size.fromHeight(AppDimensions.celebrationButtonHeight),
-              shape: const StadiumBorder(),
-              textStyle: AppTypography.celebrationButton,
-            ),
-            child: const Text('Set new goal'),
-          ),
-        ),
-        const SizedBox(height: AppDimensions.celebrationTextGap),
-        TextButton(
-          onPressed: onContinue,
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.foreground,
-            textStyle: AppTypography.celebrationButton,
-          ),
-          child: const Text('Continue without goal'),
-        ),
-      ],
-    );
-  }
-}
-
-/// Fades [child] in as it rises a little.
-class _RiseIn extends StatelessWidget {
-  const _RiseIn({required this.animation, required this.child});
-
-  final Animation<double> animation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: animation,
-      child: SlideTransition(
-        position: Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(animation),
-        child: child,
       ),
     );
   }

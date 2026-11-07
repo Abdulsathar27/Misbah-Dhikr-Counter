@@ -2,8 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/services/haptics_service.dart';
-import '../data/datasources/counter_local_datasource.dart';
-import '../data/repositories/counter_repository_impl.dart';
+import '../data/repositories/shared_preferences_counter_repository.dart';
 import '../domain/repositories/counter_repository.dart';
 import '../presentation/counter/bloc/counter_bloc.dart';
 
@@ -14,7 +13,6 @@ Future<void> configureDependencies() async {
   sl
     ..registerSingleton<SharedPreferences>(prefs)
     ..registerLazySingleton<HapticsService>(() => const DeviceHapticsService())
-    ..registerLazySingleton<CounterLocalDataSource>(() => SharedPreferencesCounterDataSource(sl()))
-    ..registerLazySingleton<CounterRepository>(() => CounterRepositoryImpl(sl()))
+    ..registerLazySingleton<CounterRepository>(() => SharedPreferencesCounterRepository(sl()))
     ..registerFactory<CounterBloc>(() => CounterBloc(repository: sl(), haptics: sl()));
 }

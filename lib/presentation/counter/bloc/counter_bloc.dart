@@ -22,13 +22,11 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
   CounterBloc({
     required this._repository,
     required this._haptics,
-    this._undoHistoryLimit = AppConstants.undoHistoryLimit,
   }) : super(const CounterState()) {
     on<CounterEvent>(
       (event, emit) => switch (event) {
         CounterInitialized() => _onInitialized(emit),
         CounterIncremented() => _onIncremented(emit),
-        CounterUndoRequested() => _onUndoRequested(emit),
         CounterResetRequested() => _onResetRequested(emit),
         CounterVibrationToggled() => _onVibrationToggled(emit),
         CounterGoalChanged(:final goal) => _onGoalChanged(emit, goal),
@@ -39,7 +37,6 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
 
   final CounterRepository _repository;
   final HapticsService _haptics;
-  final int _undoHistoryLimit;
 
   Future<void> _onInitialized(Emitter<CounterState> emit) async {
     try {
@@ -61,29 +58,13 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     final current = state.counter;
     final next = current.count + 1;
     _feedback(next == current.goal ? _haptics.goalReached : _haptics.tick);
-    _setCount(emit, current.copyWith(count: next, undoHistory: _pushHistory(current)));
-  }
-
-  Future<void> _onUndoRequested(Emitter<CounterState> emit) async {
-    final current = state.counter;
-    if (current.undoHistory.isEmpty) return;
-    _feedback(_haptics.tick);
-    final history = current.undoHistory;
-    _setCount(
-      emit,
-      current.copyWith(
-        count: history.last,
-        undoHistory: List.unmodifiable(history.sublist(0, history.length - 1)),
-      ),
-    );
+    emit(state.copyWith(counter: current.copyWith(count: next)));
   }
 
   Future<void> _onResetRequested(Emitter<CounterState> emit) async {
-    final current = state.counter;
-    if (current.count == 0) return;
+    if (state.count == 0) return;
     _feedback(_haptics.confirm);
-    // The value before the reset is kept, so an accidental reset can be undone.
-    _setCount(emit, current.copyWith(count: 0, undoHistory: _pushHistory(current)));
+    emit(state.copyWith(counter: state.counter.copyWith(count: 0)));
   }
 
   Future<void> _onVibrationToggled(Emitter<CounterState> emit) async {
@@ -109,16 +90,6 @@ class CounterBloc extends Bloc<CounterEvent, CounterState> {
     } on Object {
       emit(state.copyWith(failure: () => const PersistenceFailure()));
     }
-  }
-
-  void _setCount(Emitter<CounterState> emit, CounterEntity next) {
-    emit(state.copyWith(counter: next));
-  }
-
-  List<int> _pushHistory(CounterEntity current) {
-    final history = [...current.undoHistory, current.count];
-    final overflow = history.length - _undoHistoryLimit;
-    return List.unmodifiable(overflow > 0 ? history.sublist(overflow) : history);
   }
 
   void _feedback(Future<void> Function() pattern) {

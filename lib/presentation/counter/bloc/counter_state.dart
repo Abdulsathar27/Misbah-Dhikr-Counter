@@ -17,7 +17,6 @@ final class CounterState extends Equatable {
 
   int get count => counter.count;
   bool get vibrationEnabled => counter.vibrationEnabled;
-  bool get canUndo => counter.undoHistory.isNotEmpty;
   bool get isReady => status == CounterStatus.ready;
 
   /// Null until the user sets a goal.

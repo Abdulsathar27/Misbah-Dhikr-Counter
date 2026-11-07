@@ -2,14 +2,12 @@ import 'package:equatable/equatable.dart';
 
 import '../../core/constants/app_constants.dart';
 
-/// The counter: the current value, the values it can be undone back to (most
-/// recent last), the vibration preference and the goal the progress ring fills
-/// towards. There is no goal until the user sets one. Only the preference and
+/// The counter: the current value, the vibration preference and the goal the
+/// progress ring fills towards. There is no goal until the user sets one. Only the preference and
 /// the goal are saved; the count starts at 0 on every launch.
 class CounterEntity extends Equatable {
   const CounterEntity({
     required this.count,
-    this.undoHistory = const [],
     this.vibrationEnabled = true,
     this.goal,
   }) : assert(count >= 0, 'count must not be negative'),
@@ -18,7 +16,6 @@ class CounterEntity extends Equatable {
   static const CounterEntity initial = CounterEntity(count: 0);
 
   final int count;
-  final List<int> undoHistory;
   final bool vibrationEnabled;
 
   /// Null when the user has not set a goal.
@@ -28,18 +25,16 @@ class CounterEntity extends Equatable {
   /// `goal: () => null`.
   CounterEntity copyWith({
     int? count,
-    List<int>? undoHistory,
     bool? vibrationEnabled,
     int? Function()? goal,
   }) {
     return CounterEntity(
       count: count ?? this.count,
-      undoHistory: undoHistory ?? this.undoHistory,
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
       goal: goal != null ? goal() : this.goal,
     );
   }
 
   @override
-  List<Object?> get props => [count, undoHistory, vibrationEnabled, goal];
+  List<Object?> get props => [count, vibrationEnabled, goal];
 }

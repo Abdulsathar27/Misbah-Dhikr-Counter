@@ -50,6 +50,10 @@ abstract final class AppDimensions {
   static const double celebrationTextGap = 12;
   static const double celebrationButtonHeight = 56;
 
+  /// The widest the celebration content gets, so buttons stay a comfortable
+  /// width on tablets.
+  static const double celebrationMaxWidth = 480;
+
   // Focus ring.
   static const double focusRingWidth = 2;
   static const double controlFocusOffset = 3;
