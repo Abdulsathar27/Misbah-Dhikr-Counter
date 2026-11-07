@@ -1,14 +1,11 @@
 import 'package:counter/core/constants/app_constants.dart';
-import 'package:counter/data/datasources/counter_local_datasource.dart';
-import 'package:counter/data/repositories/counter_repository_impl.dart';
+import 'package:counter/data/repositories/shared_preferences_counter_repository.dart';
 import 'package:counter/domain/entities/counter_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<CounterRepositoryImpl> _repository() async {
-  final prefs = await SharedPreferences.getInstance();
-  return CounterRepositoryImpl(SharedPreferencesCounterDataSource(prefs));
-}
+Future<SharedPreferencesCounterRepository> _repository() async =>
+    SharedPreferencesCounterRepository(await SharedPreferences.getInstance());
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -38,7 +35,6 @@ void main() {
     final loaded = await (await _repository()).load();
 
     expect(loaded.count, 0);
-    expect(loaded.undoHistory, isEmpty);
   });
 
   test('removing the goal clears it from storage', () async {

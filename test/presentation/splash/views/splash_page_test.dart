@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../helpers/fakes.dart';
+import '../../../helpers/fakes.dart';
 
 void main() {
   Future<void> pumpApp(WidgetTester tester) async {

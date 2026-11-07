@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimensions.dart';
 import '../../counter/views/counter_page.dart';
+import '../../shared/widgets/grow_with_screen.dart';
 import '../widgets/splash_mark.dart';
 import '../widgets/splash_text.dart';
 
@@ -86,15 +87,17 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
               padding: const EdgeInsets.symmetric(horizontal: AppDimensions.stageHorizontalPadding),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SplashMark(progress: _mark),
-                    const SizedBox(height: AppDimensions.splashTitleGap),
-                    SplashWordmark(animation: _title),
-                    const SizedBox(height: AppDimensions.splashTaglineGap),
-                    SplashTagline(animation: _tagline),
-                  ],
+                child: GrowWithScreen(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SplashMark(progress: _mark),
+                      const SizedBox(height: AppDimensions.splashTitleGap),
+                      SplashWordmark(animation: _title),
+                      const SizedBox(height: AppDimensions.splashTaglineGap),
+                      SplashTagline(animation: _tagline),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -4,16 +4,13 @@ import 'package:counter/domain/entities/counter_entity.dart';
 import 'package:counter/presentation/counter/bloc/counter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../helpers/fakes.dart';
+import '../../../helpers/fakes.dart';
 
 void main() {
   late FakeCounterRepository repository;
   late FakeHapticsService haptics;
 
-  CounterBloc build({int? historyLimit}) =>
-      historyLimit == null
-          ? CounterBloc(repository: repository, haptics: haptics)
-          : CounterBloc(repository: repository, haptics: haptics, undoHistoryLimit: historyLimit);
+  CounterBloc build() => CounterBloc(repository: repository, haptics: haptics);
 
   CounterState ready(CounterEntity counter) =>
       CounterState(status: CounterStatus.ready, counter: counter);
@@ -26,12 +23,12 @@ void main() {
   group('CounterInitialized', () {
     blocTest<CounterBloc, CounterState>(
       'loads the saved count',
-      setUp: () => repository.stored = const CounterEntity(count: 41, undoHistory: [40]),
+      setUp: () => repository.stored = const CounterEntity(count: 41),
       build: build,
       act: (bloc) => bloc.add(const CounterInitialized()),
       expect:
           () => [
-            ready(const CounterEntity(count: 41, undoHistory: [40])),
+            ready(const CounterEntity(count: 41)),
           ],
     );
 
@@ -58,7 +55,7 @@ void main() {
       act: (bloc) => bloc.add(const CounterIncremented()),
       expect:
           () => [
-            ready(const CounterEntity(count: 10, undoHistory: [9])),
+            ready(const CounterEntity(count: 10)),
           ],
       verify: (_) {
         expect(haptics.ticks, 1);
@@ -120,88 +117,21 @@ void main() {
         expect(bloc.state.count, 250);
       },
     );
-
-    blocTest<CounterBloc, CounterState>(
-      'caps the undo history',
-      build: () => build(historyLimit: 3),
-      seed: () => ready(const CounterEntity(count: 0)),
-      act: (bloc) {
-        for (var i = 0; i < 5; i++) {
-          bloc.add(const CounterIncremented());
-        }
-      },
-      verify: (bloc) => expect(bloc.state.counter.undoHistory, [2, 3, 4]),
-    );
-  });
-
-  group('CounterUndoRequested', () {
-    blocTest<CounterBloc, CounterState>(
-      'restores the previous count',
-      build: build,
-      seed: () => ready(const CounterEntity(count: 5, undoHistory: [3, 4])),
-      act: (bloc) => bloc.add(const CounterUndoRequested()),
-      expect:
-          () => [
-            ready(const CounterEntity(count: 4, undoHistory: [3])),
-          ],
-    );
-
-    blocTest<CounterBloc, CounterState>(
-      'never goes below zero',
-      build: build,
-      seed: () => ready(const CounterEntity(count: 0)),
-      act:
-          (bloc) =>
-              bloc
-                ..add(const CounterUndoRequested())
-                ..add(const CounterUndoRequested()),
-      expect: () => <CounterState>[],
-    );
-
-    blocTest<CounterBloc, CounterState>(
-      'stops at zero after undoing every increment',
-      build: build,
-      seed: () => ready(const CounterEntity(count: 0)),
-      act:
-          (bloc) =>
-              bloc
-                ..add(const CounterIncremented())
-                ..add(const CounterIncremented())
-                ..add(const CounterUndoRequested())
-                ..add(const CounterUndoRequested())
-                ..add(const CounterUndoRequested()),
-      verify: (bloc) {
-        expect(bloc.state.count, 0);
-        expect(bloc.state.canUndo, isFalse);
-      },
-    );
   });
 
   group('CounterResetRequested', () {
     blocTest<CounterBloc, CounterState>(
       'returns to zero and persists it',
       build: build,
-      seed: () => ready(const CounterEntity(count: 37, undoHistory: [36])),
+      seed: () => ready(const CounterEntity(count: 37)),
       act: (bloc) => bloc.add(const CounterResetRequested()),
       expect:
           () => [
-            ready(const CounterEntity(count: 0, undoHistory: [36, 37])),
+            ready(const CounterEntity(count: 0)),
           ],
       verify: (_) {
         expect(haptics.confirms, 1);
       },
-    );
-
-    blocTest<CounterBloc, CounterState>(
-      'can be undone',
-      build: build,
-      seed: () => ready(const CounterEntity(count: 37)),
-      act:
-          (bloc) =>
-              bloc
-                ..add(const CounterResetRequested())
-                ..add(const CounterUndoRequested()),
-      verify: (bloc) => expect(bloc.state.count, 37),
     );
 
     blocTest<CounterBloc, CounterState>(

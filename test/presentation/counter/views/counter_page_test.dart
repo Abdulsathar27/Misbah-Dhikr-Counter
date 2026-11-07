@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../helpers/fakes.dart';
+import '../../../helpers/fakes.dart';
 
 void main() {
   late FakeCounterRepository repository;
@@ -444,6 +444,79 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(ringShows('123456'), findsOneWidget);
+  });
+
+  group('fits every screen', () {
+    const screens = {
+      'small phone': Size(320, 568),
+      'compact Android': Size(360, 640),
+      'design-size phone': Size(390, 844),
+      'large phone': Size(430, 932),
+      'tablet portrait': Size(820, 1180),
+      'tablet landscape': Size(1180, 820),
+      'short split-screen window': Size(640, 360),
+    };
+
+    void useScreen(WidgetTester tester, Size size) {
+      tester.view
+        ..physicalSize = size
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+    }
+
+    for (final MapEntry(key: name, value: size) in screens.entries) {
+      testWidgets('$name (${size.width.toInt()}×${size.height.toInt()})', (tester) async {
+        useScreen(tester, size);
+        await pumpApp(tester, saved: const CounterEntity(count: 3, goal: 10));
+
+        expect(tester.takeException(), isNull);
+        for (final control in [
+          tapArea,
+          find.bySemanticsLabel('Reset count'),
+          find.bySemanticsLabel('Vibration: on'),
+          find.bySemanticsLabel('Set goal. Current goal: 10'),
+        ]) {
+          expect(control.hitTestable(), findsOneWidget);
+          final drawn = tester.getRect(control);
+          expect((Offset.zero & size).inflate(0.01).contains(drawn.bottomRight), isTrue);
+          expect(drawn.topLeft.dx >= 0 && drawn.topLeft.dy >= 0, isTrue);
+        }
+
+        // Taps land where the scaled button is drawn.
+        await tester.tap(tapArea);
+        await tester.pumpAndSettle();
+        expect(ringShows('4'), findsOneWidget);
+      });
+    }
+
+    testWidgets('the ring is drawn as designed on the design-size phone', (tester) async {
+      useScreen(tester, const Size(390, 844));
+      await pumpApp(tester);
+
+      expect(tester.getRect(ring).width, closeTo(240, 0.01));
+    });
+
+    testWidgets('the ring grows on a tablet', (tester) async {
+      useScreen(tester, const Size(820, 1180));
+      await pumpApp(tester);
+
+      expect(tester.getRect(ring).width, greaterThan(300));
+    });
+
+    testWidgets('the celebration fits a tablet and keeps its buttons a comfortable width', (
+      tester,
+    ) async {
+      useScreen(tester, const Size(1180, 820));
+      await reachGoal(tester);
+
+      expect(tester.takeException(), isNull);
+      final button = find.text('Set new goal');
+      expect(button.hitTestable(), findsOneWidget);
+      expect(
+        tester.getRect(find.ancestor(of: button, matching: find.byType(FilledButton))).width,
+        lessThanOrEqualTo(480),
+      );
+    });
   });
 
   testWidgets('skips the ring animation when the platform asks for reduced motion', (tester) async {
