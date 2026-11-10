@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimensions.dart';
 import '../../shared/widgets/grow_with_screen.dart';
+import '../../shared/widgets/rise_in.dart';
 import '../widgets/celebration_actions.dart';
 import '../widgets/celebration_count_up.dart';
 import '../widgets/celebration_emblem.dart';
 import '../widgets/celebration_message.dart';
 import '../widgets/goal_dialog.dart';
-import '../widgets/rise_in.dart';
 
 /// Celebrates reaching [goal] full-screen, then asks what comes next. It must
 /// be answered: back does nothing, as counting stays stopped until then.

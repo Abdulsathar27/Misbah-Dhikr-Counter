@@ -21,7 +21,8 @@ Future<void> main() async {
 
   await configureDependencies();
 
-  // Load the saved count before the first frame so it is visible at launch.
+  // Load the saved settings before the first frame, so the counter shows the
+  // goal and vibration setting straight away.
   final counterBloc = sl<CounterBloc>()..add(const CounterInitialized());
   await counterBloc.stream.firstWhere((state) => state.isReady);
 

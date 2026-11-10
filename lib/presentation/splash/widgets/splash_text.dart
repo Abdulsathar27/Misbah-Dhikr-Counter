@@ -2,25 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_typography.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../shared/widgets/rise_in.dart';
 
-/// Fades [child] in while it rises a little, driven by [animation].
-class RiseIn extends StatelessWidget {
-  const RiseIn({super.key, required this.animation, required this.child});
-
-  final Animation<double> animation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: animation,
-      child: SlideTransition(
-        position: Tween(begin: const Offset(0, 0.4), end: Offset.zero).animate(animation),
-        child: child,
-      ),
-    );
-  }
-}
+/// How far splash text rises as it fades in: further than [RiseIn]'s default,
+/// for a slower arrival.
+const double _rise = 0.4;
 
 /// The MISBAH wordmark. Its letters start wide apart and draw together as
 /// [animation] runs.
@@ -39,6 +25,7 @@ class SplashWordmark extends StatelessWidget {
       excludeSemantics: true,
       child: RiseIn(
         animation: animation,
+        rise: _rise,
         child: AnimatedBuilder(
           animation: animation,
           builder: (context, _) {
@@ -73,6 +60,7 @@ class SplashTagline extends StatelessWidget {
   Widget build(BuildContext context) {
     return RiseIn(
       animation: animation,
+      rise: _rise,
       child: const Text(
         AppConstants.tagline,
         textAlign: TextAlign.center,
