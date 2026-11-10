@@ -16,8 +16,9 @@ part 'counter_state.dart';
 /// Single source of truth for the counter.
 ///
 /// All events go through one [sequential] queue: every tap is applied exactly
-/// once and in order, none are dropped, and a save always finishes before the
-/// next change is computed, so rapid tapping cannot lose updates.
+/// once and in order, so rapid tapping cannot lose updates, and a settings
+/// save always finishes before the next change is computed. The count itself
+/// is never saved.
 class CounterBloc extends Bloc<CounterEvent, CounterState> {
   CounterBloc({
     required this._repository,

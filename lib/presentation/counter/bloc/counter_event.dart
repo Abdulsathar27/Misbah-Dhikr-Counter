@@ -7,7 +7,8 @@ sealed class CounterEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Loads the saved counter. Dispatched once when the BLoC is created.
+/// Loads the saved settings, with the count at 0. Dispatched once when the
+/// BLoC is created.
 final class CounterInitialized extends CounterEvent {
   const CounterInitialized();
 }
