@@ -4,6 +4,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_dimensions.dart';
 import '../../../app/theme/app_layout.dart';
 import '../../shared/widgets/grow_with_screen.dart';
+import '../widgets/about_button.dart';
 import '../widgets/brand_header.dart';
 import '../widgets/counter_controls.dart';
 import '../widgets/counter_stage.dart';
@@ -27,14 +28,37 @@ class CounterPage extends StatelessWidget {
           body: SafeArea(
             // CounterControls handles the bottom inset itself.
             bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: AppDimensions.screenTopPadding * spacing),
-                const EntranceAnimation(child: GrowWithScreen(child: BrandHeader())),
-                const Expanded(child: EntranceAnimation(delay: 0.15, child: CounterStage())),
-                const EntranceAnimation(delay: 0.3, child: CounterControls()),
-              ],
+            // Keyboard focus reaches the counter and its controls before the
+            // About button, which sits first on screen but matters least.
+            child: FocusTraversalGroup(
+              policy: OrderedTraversalPolicy(),
+              child: Stack(
+                children: [
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(1),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: AppDimensions.screenTopPadding * spacing),
+                        const EntranceAnimation(child: GrowWithScreen(child: BrandHeader())),
+                        const Expanded(
+                          child: EntranceAnimation(delay: 0.15, child: CounterStage()),
+                        ),
+                        const EntranceAnimation(delay: 0.3, child: CounterControls()),
+                      ],
+                    ),
+                  ),
+                  // In the empty top corner, so the layout below is unchanged.
+                  const Positioned(
+                    top: 4,
+                    right: 4,
+                    child: FocusTraversalOrder(
+                      order: NumericFocusOrder(2),
+                      child: EntranceAnimation(child: AboutButton()),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

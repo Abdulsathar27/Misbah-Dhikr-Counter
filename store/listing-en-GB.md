@@ -46,4 +46,4 @@ Lifestyle
 
 - App icon: graphics/icon-512.png (512 × 512)
 - Feature graphic: graphics/feature-graphic-1024x500.png (1024 × 500)
-- Phone screenshots: screenshots/ (to be captured)
+- Phone screenshots (1080 × 2160, in this order): screenshots/1_counting.png, 2_goal_complete.png, 3_splash.png, 4_privacy.png
